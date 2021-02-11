@@ -1,0 +1,34 @@
+{
+  "name": "shipping-loggi-for-woocommerce",
+  "version": "1.0.0",
+  "description": "A plugin to integrate Loggi with WooCommerce.",
+  "author": "Mário Valney",
+  "main": "index.js",
+  "scripts": {
+    "publish": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mariovalney/shipping-loggi-for-woocommerce"
+  },
+  "keywords": [
+    "WooCommerce",
+    "WordPress"
+  ],
+  "license": "GPLv2 or later",
+  "homepage": "https://github.com/mariovalney/shipping-loggi-for-woocommerce",
+  "browserslist": [
+    "last 2 versions"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-clean-css": "^4.2.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-uglify-es": "^1.0.4",
+    "gulp-zip": "^5.0.1"
+  }
+}
