@@ -49,6 +49,7 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
          */
         public function define_hooks() {
             $this->core->add_filter( 'woocommerce_shipping_methods', array( $this, 'woocommerce_shipping_methods' ), 99 );
+            $this->core->add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 99 );
         }
 
         /**
@@ -64,6 +65,42 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             }
 
             return $methods;
+        }
+
+        /**
+         * Action: 'wp_ajax_nopriv_slfw_request_api_key'
+         * Request the API Key using password data.
+         *
+         * @return void
+         */
+        public function wp_ajax_nopriv_slfw_request_api_key() {
+            check_ajax_referer( 'slfw-request-api-key', 'nonce' );
+        }
+
+        /**
+         * Action: 'admin_enqueue_scripts'
+         * Enqueue scripts or styles for gateway settings page.
+         *
+         * We do not validate page into actions because WooCommerce says:
+         * "Gateways are only loaded when needed, such as during checkout and on the settings page in admin"
+         *
+         * @link https://docs.woocommerce.com/document/payment-gateway-api/#section-8
+         *
+         * @return void
+         */
+        public function admin_enqueue_scripts( $hook ) {
+            if ( $hook !== 'woocommerce_page_wc-settings' || ( $_GET['page'] ?? '' ) !== 'wc-settings' || ( $_GET['tab'] ?? '' ) !== 'shipping' ) {
+                return;
+            }
+
+            $version = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? uniqid() : SLFW_VERSION;
+
+            $file_url  = SLFW_PLUGIN_URL . '/modules/woocommerce/assets/build/js/loggi-shipping.min.js';
+            wp_enqueue_script( 'slfw-loggi-shipping-script', $file_url, array( 'jquery', 'wp-i18n' ), $version, true );
+            wp_set_script_translations( 'slfw-loggi-shipping-script', 'shipping-loggi-for-woocommerce' );
+
+            $file_url  = SLFW_PLUGIN_URL . '/modules/woocommerce/assets/build/css/loggi-shipping.min.css';
+            wp_enqueue_style( 'slfw-loggi-shipping-style', $file_url, array(), $version );
         }
 
     }

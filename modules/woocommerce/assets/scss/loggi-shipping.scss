@@ -1,0 +1,12 @@
+.slfw-invalid-input {
+    border-color: #d63638 !important;
+}
+
+.slfw-request-description {
+    display: block;
+    margin-bottom: .4rem;
+
+    &.error {
+        color: #d63638 !important;
+    }
+}

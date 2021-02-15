@@ -36,7 +36,6 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $this->supports = array(
                 'shipping-zones',
                 'instance-settings',
-                'instance-settings-modal',
             );
 
             // Load the form fields.
@@ -51,9 +50,6 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             // API
             $this->api = new SLFW_Loggi_Api( $this );
 
-            // Hooks
-            add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
-
             // Save admin options
             add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
         }
@@ -63,9 +59,18 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          *
          * @return void
          *
+         * @SuppressWarnings(PHPMD.LongVariable)
          * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
          */
         public function init_form_fields() {
+            $api_key_debug_desc_tip = __( 'Require it sending a mail for Loggi Support (contato.api@loggi.com).', 'shipping-loggi-for-woocommerce' );
+
+            $api_key_debug_description = sprintf(
+                // translators: Link to open passsword form. Text is "click here".
+                __( '%s to use your password.', 'shipping-loggi-for-woocommerce' ),
+                '<a class="slfw-request-api-key" href="#">' . __( 'Click here', 'shipping-loggi-for-woocommerce' ) . '</a>',
+            );
+
             $debug_description = sprintf(
                 // translators: link to logs page
                 __( 'You can check logs in %s.', 'shipping-loggi-for-woocommerce' ),
@@ -73,23 +78,21 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             );
 
             $this->instance_form_fields = array(
-                'title'       => array(
+                'title'              => array(
                     'type'              => 'text',
                     'title'             => __( 'Title', 'shipping-loggi-for-woocommerce' ),
-                    'description'       => __( 'Shipping method title for customer.', 'shipping-loggi-for-woocommerce' ),
-                    'desc_tip'          => true,
+                    'desc_tip'          => __( 'Shipping method title for customer.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => __( 'Loggi', 'shipping-loggi-for-woocommerce' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
-                'api_section' => array(
+                'api_section'        => array(
                     'type'  => 'title',
                     'title' => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
                 ),
-                'environment' => array(
+                'environment'        => array(
                     'type'              => 'select',
                     'title'             => __( 'Environment', 'shipping-loggi-for-woocommerce' ),
-                    'description'       => __( 'Loggi API environment. Use Staging for tests and Production for your running shop.', 'shipping-loggi-for-woocommerce' ),
-                    'desc_tip'          => true,
+                    'desc_tip'          => __( 'Loggi API environment. Use Staging for tests and Production for your running shop.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => 'staging',
                     'options'           => array(
                         'staging'    => __( 'Staging', 'shipping-loggi-for-woocommerce' ),
@@ -97,11 +100,57 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
-                'advanced_section' => array(
+                'staging_api_email'    => array(
+                    'type'              => 'email',
+                    'title'             => __( 'E-mail', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'The e-mail you use on Loggi Staging dashboard.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '',
+                    'custom_attributes' => array(
+                        'required' => 'required',
+                        'data-slfw-environment-field' => 'staging',
+                    ),
+                ),
+                'production_api_email' => array(
+                    'type'              => 'email',
+                    'title'             => __( 'E-mail', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'The e-mail you use on Loggi Production dashboard.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '',
+                    'custom_attributes' => array(
+                        'required' => 'required',
+                        'data-slfw-environment-field' => 'production',
+                    ),
+                ),
+                'staging_api_key'    => array(
+                    'type'              => 'text',
+                    'title'             => __( 'API Key', 'shipping-loggi-for-woocommerce' ),
+                    'description'       => $api_key_debug_description,
+                    'desc_tip'          => __( 'For Staging.', 'shipping-loggi-for-woocommerce' ) . ' ' . $api_key_debug_desc_tip,
+                    'default'           => '',
+                    'custom_attributes' => array(
+                        'required'                    => 'required',
+                        'data-slfw-environment-field' => 'staging',
+                        'data-email-input'            => 'woocommerce_' . $this->id . '_staging_api_email',
+                        'data-nonce'                  => wp_create_nonce( 'slfw-request-api-key' ),
+                    ),
+                ),
+                'production_api_key' => array(
+                    'type'              => 'text',
+                    'title'             => __( 'API Key', 'shipping-loggi-for-woocommerce' ),
+                    'description'       => $api_key_debug_description,
+                    'desc_tip'          => __( 'For Production.', 'shipping-loggi-for-woocommerce' ) . ' ' . $api_key_debug_desc_tip,
+                    'default'           => '',
+                    'custom_attributes' => array(
+                        'required'                    => 'required',
+                        'data-slfw-environment-field' => 'production',
+                        'data-email-input'            => 'woocommerce_' . $this->id . '_production_api_email',
+                        'data-nonce'                  => wp_create_nonce( 'slfw-request-api-key' ),
+                    ),
+                ),
+                'advanced_section'   => array(
                     'type'  => 'title',
                     'title' => __( 'Advanced Settings', 'shipping-loggi-for-woocommerce' ),
                 ),
-                'debug'       => array(
+                'debug'              => array(
                     'type'        => 'checkbox',
                     'title'       => __( 'Debug Log', 'shipping-loggi-for-woocommerce' ),
                     'label'       => __( 'Enable logging', 'shipping-loggi-for-woocommerce' ),
@@ -127,27 +176,6 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
             // Register the rate
             $this->add_rate( $rate );
-        }
-
-        /**
-         * Action: 'admin_enqueue_scripts'
-         * Enqueue scripts or styles for gateway settings page.
-         *
-         * We do not validate page into actions because WooCommerce says:
-         * "Gateways are only loaded when needed, such as during checkout and on the settings page in admin"
-         *
-         * @link https://docs.woocommerce.com/document/payment-gateway-api/#section-8
-         *
-         * @return void
-         */
-        public function admin_enqueue_scripts() {
-            $version = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? uniqid() : SLFW_VERSION;
-
-            $file_url  = SLFW_PLUGIN_URL . '/modules/woocommerce/assets/build/js/loggi-shipping.min.js';
-            wp_enqueue_script( $this->id . '-loggi-shipping-script', $file_url, array( 'jquery' ), $version, true );
-
-            $file_url  = SLFW_PLUGIN_URL . '/modules/woocommerce/assets/build/css/loggi-shipping.min.css';
-            wp_enqueue_style( $this->id . '-loggi-shipping-style', $file_url, array(), $version );
         }
 
     }

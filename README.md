@@ -472,11 +472,11 @@ t###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
  ###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-4###  ###
+5###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
 .###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-7###  ###
+0###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
  ###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)

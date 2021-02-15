@@ -2,7 +2,7 @@
 Contributors: mariovalney
 Donate link: https://github.com/mariovalney/shipping-loggi-for-woocommerce
 Tags: woocommerce, api, loggi, shipping, mariovalney
-Requires at least: 4.7
+Requires at least: 5.0
 Tested up to: 5.6
 Requires PHP: 7.0
 Stable tag: trunk
