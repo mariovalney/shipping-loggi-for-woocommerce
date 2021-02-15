@@ -63,14 +63,23 @@ jQuery(document).ready(function($) {
                 action: 'slfw_request_api_key',
                 email: email,
                 password: password,
+                environment: input.data('environment'),
                 nonce: input.data('nonce')
             },
         })
         .done(response => {
-            console.log(response);
+            if (response.success && response.data) {
+                alert( __( 'API Key found. Save the new settings.', 'shipping-loggi-for-woocommerce' ) );
+                input.val(response.data);
+                return;
+            }
 
-            alert( __( 'Impossible to request your API Key. Please try again in few minutes.', 'shipping-loggi-for-woocommerce' ), 'error' );
-            // alert('');
+            if (response.data) {
+                alert( response.data, 'error' );
+                return;
+            }
+
+            alert( __( 'Error: please reload the page and try again.', 'shipping-loggi-for-woocommerce' ), 'error' );
         })
         .fail(() => {
             alert( __( 'Impossible to request your API Key. Please try again in few minutes.', 'shipping-loggi-for-woocommerce' ), 'error' );

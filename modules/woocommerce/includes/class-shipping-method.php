@@ -48,7 +48,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $this->debug       = $this->get_option( 'debug' );
 
             // API
-            $this->api = new SLFW_Loggi_Api( $this );
+            $this->api = new SLFW_Loggi_Api( $this->environment );
 
             // Save admin options
             add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -130,6 +130,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                         'required'                    => 'required',
                         'data-slfw-environment-field' => 'staging',
                         'data-email-input'            => 'woocommerce_' . $this->id . '_staging_api_email',
+                        'data-environment'            => 'staging',
                         'data-nonce'                  => wp_create_nonce( 'slfw-request-api-key' ),
                     ),
                 ),
@@ -143,6 +144,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                         'required'                    => 'required',
                         'data-slfw-environment-field' => 'production',
                         'data-email-input'            => 'woocommerce_' . $this->id . '_production_api_email',
+                        'data-environment'            => 'production',
                         'data-nonce'                  => wp_create_nonce( 'slfw-request-api-key' ),
                     ),
                 ),

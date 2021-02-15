@@ -50,6 +50,8 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
         public function define_hooks() {
             $this->core->add_filter( 'woocommerce_shipping_methods', array( $this, 'woocommerce_shipping_methods' ), 99 );
             $this->core->add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 99 );
+
+            $this->core->add_action( 'wp_ajax_slfw_request_api_key', array( $this, 'wp_ajax_slfw_request_api_key' ), 99 );
         }
 
         /**
@@ -68,13 +70,40 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
         }
 
         /**
-         * Action: 'wp_ajax_nopriv_slfw_request_api_key'
+         * Action: 'wp_ajax_slfw_request_api_key'
          * Request the API Key using password data.
          *
          * @return void
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
          */
-        public function wp_ajax_nopriv_slfw_request_api_key() {
+        public function wp_ajax_slfw_request_api_key() {
             check_ajax_referer( 'slfw-request-api-key', 'nonce' );
+
+            $email = sanitize_text_field( $_POST['email'] ?? '' );
+            $password = sanitize_text_field( $_POST['password'] ?? '' );
+            $environment = sanitize_text_field( $_POST['environment'] ?? '' );
+
+            if ( empty( $email ) ) {
+                wp_send_json_error( __( 'You should insert your Loggi e-mail in "E-mail" field.', 'shipping-loggi-for-woocommerce' ) );
+            }
+
+            if ( empty( $password ) ) {
+                wp_send_json_error( __( 'You should insert your Loggi password in "API Key" field.', 'shipping-loggi-for-woocommerce' ) );
+            }
+
+            if ( empty( $environment ) ) {
+                wp_send_json_error();
+            }
+
+            $api = new SLFW_Loggi_Api( $environment );
+            $api_key = $api->retrieve_api_key( $email, $password );
+
+            if ( empty( $api_key ) ) {
+                wp_send_json_error( __( 'Invalid e-mail or password. Check your credentials and try again.', 'shipping-loggi-for-woocommerce' ) );
+            }
+
+            wp_send_json_success( $api_key );
         }
 
         /**

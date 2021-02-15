@@ -17,18 +17,179 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
     class SLFW_Loggi_Api {
 
         /**
-         * Shipping Method
-         * @var SLFW_Shipping_Method
+         * The environment
+         * @var string
          */
-        private $method;
+        private $environment;
+
+        /**
+         * The api_email
+         * @var string
+         */
+        private $api_email;
+
+        /**
+         * The api_key
+         * @var string
+         */
+        private $api_key;
 
         /**
          * The constructor
          *
-         * @param SLFW_Shipping_Method $method
+         * @param string $environment
          */
-        public function __construct( SLFW_Shipping_Method $method ) {
-            $this->method = $method;
+        public function __construct( $environment, $api_email = '', $api_key = '' ) {
+            $this->environment = $environment;
+            $this->api_email = $api_email;
+            $this->api_key = $api_key;
+        }
+
+        /**
+         * Request a API from e-mail and password
+         * @return string
+         */
+        public function retrieve_api_key( $email, $password ) {
+            $params = array(
+                'input' => array(
+                    'email' => $email,
+                    'password' => $password,
+                ),
+            );
+
+            $selection = array(
+                'user' => array(
+                    'apiKey',
+                ),
+            );
+
+            $response = $this->make_request( 'login', $params, $selection );
+            $user = $response ? $response['user'] : array();
+
+            return $user['apiKey'] ?? '';
+        }
+
+        /**
+         * Make a request to API
+         *
+         * @param string $type
+         * @return string
+         */
+        protected function make_request( $name, $params = array(), $selection = array() ) {
+            $args = array(
+                'timeout' => 60,
+                'blocking' => true,
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                ),
+                'body' => json_encode(
+                    array(
+                        'query' => $this->parse_operation( $name, $params, $selection ),
+                    )
+                ),
+            );
+
+            if ( ! empty( $this->api_email ) && ! empty( $this->api_key ) ) {
+                $args['headers']['Authorization'] = sprintf( 'ApiKey %s:%s', $this->api_email, $this->api_key );
+            }
+
+            $response = wp_remote_post( $this->get_url(), $args );
+            if ( is_wp_error( $response ) ) {
+                error_log( $response->get_error_message() );
+                return false;
+            }
+
+            $response = json_decode( $response['body'] ?? array(), true );
+
+            // Check for errors
+            if ( ! empty( $response['errors'] ) ) {
+                foreach ( $response['errors'] as $error ) {
+                    error_log( $error['message'] ?? '' );
+                }
+
+                return false;
+            }
+
+            if ( empty( $response['data'] ) ) {
+                return false;
+            }
+
+            return $response['data'][ $name ] ?? false;
+        }
+
+        /**
+         * Parse a GraphQL operation
+         *
+         * @param  string $name
+         * @param  mixed $params
+         * @param  mixed $selection
+         * @return string
+         */
+        private function parse_operation( $name, $params, $selection ) {
+            $params = $this->parse_params( $params );
+            $selection = $this->parse_selection( $selection );
+
+            if ( ! empty( $params ) ) {
+                return sprintf( 'mutation {%s(%s) {%s}}', $name, $params, $selection );
+            }
+
+            return sprintf( 'query {%s {%s}}', $name, $selection );
+        }
+
+        /**
+         * Parse the operation params
+         *
+         * @param  array $params
+         * @return string
+         */
+        private function parse_params( $params ) {
+            $parsed = '';
+
+            foreach ( (array) $params as $key => $values ) {
+                $parsed .= sprintf( '%s:%s', $key, $this->json_encode( $values ) );
+            }
+
+            return $parsed;
+        }
+
+        /**
+         * Parse the operation selection
+         *
+         * @param  array $params
+         * @return string
+         */
+        private function parse_selection( $selection ) {
+            $parsed = '';
+
+            foreach ( (array) $selection as $key => $values ) {
+                $parsed .= sprintf( '%s %s', $key, $this->json_encode( $values ) );
+            }
+
+            return $parsed;
+        }
+
+        private function json_encode( $object, $quotes = true ) {
+            if ( is_scalar( $object ) ) {
+                $object = (string) $object;
+
+                if ( $quotes ) {
+                    return '"' . $object . '"';
+                }
+
+                return $object;
+            }
+
+            $parsed = array();
+            foreach ( (array) $object as $key => $values ) {
+                if ( is_numeric( $key ) ) {
+                    $parsed[] = $this->json_encode( $values, false );
+                    continue;
+                }
+
+                $parsed[] = sprintf( '%s: %s', $key, $this->json_encode( $values ) );
+            }
+
+            return sprintf( '{%s}', implode( ',', $parsed ) );
         }
 
         /**
@@ -37,7 +198,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @return string
          */
         private function get_url() {
-            if ( $this->method->environment === 'production' ) {
+            if ( $this->environment === 'production' ) {
                 return 'https://www.loggi.com/graphql';
             }
 
