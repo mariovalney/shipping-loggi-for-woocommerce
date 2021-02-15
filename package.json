@@ -1,7 +1,7 @@
 {
   "name": "shipping-loggi-for-woocommerce",
   "version": "1.0.0",
-  "description": "A plugin to integrate Loggi with WooCommerce.",
+  "description": "Shipping via motorcycle courier with Loggi.",
   "author": "Mário Valney",
   "main": "index.js",
   "scripts": {

@@ -817,6 +817,136 @@ l###  ###
 
 ###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+S###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+h###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+p###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+p###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+n###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+g###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+v###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+a###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+m###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+o###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+t###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+o###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+r###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+c###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+y###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+c###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+l###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+e###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+c###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+o###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+u###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+r###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+e###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+r###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+w###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+t###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+h###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+L###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+o###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+g###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+g###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+
+###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+
+###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+=###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+=###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+D###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+e###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+s###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+c###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+r###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+p###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+t###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+i###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+o###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+n###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+ ###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+=###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+=###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+
+###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
+
+###  ###
+![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
 A###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
  ###  ###
@@ -906,46 +1036,6 @@ c###  ###
 e###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
 .###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-
-###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-
-###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-=###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-=###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
- ###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-D###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-e###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-s###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-c###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-r###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-i###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-p###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-t###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-i###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-o###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-n###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
- ###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-=###  ###
-![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
-=###  ###
 ![](http://ps.w.org/shipping-loggi-for-woocommerce/assets/screenshot-1.png)
 
 ###  ###

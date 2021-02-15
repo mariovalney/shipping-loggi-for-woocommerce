@@ -36,6 +36,7 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             }
 
             $this->includes = array(
+                'class-shipping-method',
             );
         }
 
@@ -46,6 +47,22 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
          * @param    Shipping_Loggi_For_WooCommerce      $core   The Core object
          */
         public function define_hooks() {
+            $this->core->add_filter( 'woocommerce_shipping_methods', array( $this, 'woocommerce_shipping_methods' ), 99 );
+        }
+
+        /**
+         * Filter: 'woocommerce_shipping_methods'
+         * Add shipping method to WooCommerce.
+         *
+         * @param array $methods
+         * @return void
+         */
+        public function woocommerce_shipping_methods( $methods ) {
+            if ( class_exists( 'SLFW_Shipping_Method' ) ) {
+                $methods = array_merge( array( SLFW_Shipping_Method::ID => 'SLFW_Shipping_Method' ), $methods );
+            }
+
+            return $methods;
         }
 
     }

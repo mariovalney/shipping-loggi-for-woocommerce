@@ -3,7 +3,7 @@
 /**
  * Plugin Name:     Shipping Loggi for WooCommerce
  * Plugin URI:      https://github.com/mariovalney/shipping-loggi-for-woocommerce
- * Description:     Improve your WooCommerce API REST
+ * Description:     Shipping via motorcycle courier with Loggi
  * Version:         1.0.0
  * License:         GPLv2 or later
  * Author:          Mário Valney
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 4.5
- * WC tested up to: 4.8
+ * WC tested up to: 5.0
  *
  * @package         Shipping_Loggi_For_WooCommerce
  * @since           1.0.0

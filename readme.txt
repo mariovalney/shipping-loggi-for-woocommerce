@@ -9,9 +9,11 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A plugin to integrate Loggi with WooCommerce.
+Shipping via motorcycle courier with Loggi
 
 == Description ==
+
+A plugin to integrate Loggi with WooCommerce.
 
 [WooCommerce](https://wordpress.org/plugins/woocommerce/ "Install it first, of course") is a awesome plugin used by 5+ million WordPress websites to create e-commerce.
 
