@@ -12,7 +12,7 @@
 // If this file is called directly, call the cops.
 defined( 'ABSPATH' ) || die( 'No script kiddies please!' );
 
-if ( ! class_exists( 'SLFW_Shipping_Method' ) ) {
+if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Method' ) ) {
 
     class SLFW_Shipping_Method extends WC_Shipping_Method {
 
@@ -31,7 +31,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) ) {
             $this->tax_status         = false;
 
             // Register Support
-            $this->supports             = array(
+            $this->supports = array(
                 'shipping-zones',
                 'instance-settings',
                 'instance-settings-modal',
@@ -41,9 +41,13 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) ) {
             $this->init_form_fields();
 
             // Options
-            $this->enabled = $this->get_option( 'enabled' );
-            $this->title   = $this->get_option( 'title', 'Loggi' );
-            $this->debug   = $this->get_option( 'debug' );
+            $this->enabled     = $this->get_option( 'enabled' );
+            $this->title       = $this->get_option( 'title', 'Loggi' );
+            $this->environment = $this->get_option( 'environment' );
+            $this->debug       = $this->get_option( 'debug' );
+
+            // API
+            $this->api = new SLFW_Loggi_Api( $this );
 
             // Save admin options.
             add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -58,23 +62,44 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) ) {
          */
         public function init_form_fields() {
             $debug_description = sprintf(
-                // translators: link to debug
-                __( 'Log de entregas. Disponível em: %s.', 'shipping-loggi-for-woocommerce' ),
+                // translators: link to logs page
+                __( 'You can check logs in %s.', 'shipping-loggi-for-woocommerce' ),
                 '<a href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs&log_file=' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.log' ) ) . '" target="_blank">' . __( 'System Status &gt; Logs', WCB_TEXTDOMAIN ) . '</a>'
             );
 
             $this->instance_form_fields = array(
-                'title'         => array(
+                'title'       => array(
                     'type'              => 'text',
-                    'title'             => __( 'Título', 'shipping-loggi-for-woocommerce' ),
-                    'description'       => __( 'Título do método de entrega para o usuário.', 'shipping-loggi-for-woocommerce' ),
-                    'default'           => __( 'Via Loggi', 'shipping-loggi-for-woocommerce' ),
+                    'title'             => __( 'Title', 'shipping-loggi-for-woocommerce' ),
+                    'description'       => __( 'Shipping method title for customer.', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => true,
+                    'default'           => __( 'Loggi', 'shipping-loggi-for-woocommerce' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
-                'debug'         => array(
+                'api_section' => array(
+                    'type'  => 'title',
+                    'title' => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
+                ),
+                'environment' => array(
+                    'type'              => 'select',
+                    'title'             => __( 'Environment', 'shipping-loggi-for-woocommerce' ),
+                    'description'       => __( 'Loggi API environment. Use Staging for tests and Production for your running shop.', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => true,
+                    'default'           => 'staging',
+                    'options'           => array(
+                        'staging'    => __( 'Staging', 'shipping-loggi-for-woocommerce' ),
+                        'production' => __( 'Production', 'shipping-loggi-for-woocommerce' ),
+                    ),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
+                'advanced_section' => array(
+                    'type'  => 'title',
+                    'title' => __( 'Advanced Settings', 'shipping-loggi-for-woocommerce' ),
+                ),
+                'debug'       => array(
                     'type'        => 'checkbox',
-                    'title'       => __( 'Avançado', 'shipping-loggi-for-woocommerce' ),
-                    'label'       => __( 'Ativar Depuração', 'shipping-loggi-for-woocommerce' ),
+                    'title'       => __( 'Debug Log', 'shipping-loggi-for-woocommerce' ),
+                    'label'       => __( 'Enable logging', 'shipping-loggi-for-woocommerce' ),
                     'description' => $debug_description,
                     'default'     => 'no',
                 ),
@@ -89,9 +114,8 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) ) {
          */
         public function calculate_shipping( $package = array() ) {
             $rate = array(
-                'id'        => $this->id,
                 'label'     => $this->title,
-                'cost'      => 20.0,
+                'cost'      => 20.00,
                 'taxes'     => false,
                 'meta_data' => array(),
             );

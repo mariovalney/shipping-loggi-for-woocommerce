@@ -36,6 +36,7 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             }
 
             $this->includes = array(
+                'class-loggi-api',
                 'class-shipping-method',
             );
         }
