@@ -20,6 +20,8 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
         /**
          * The constructor
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
          */
         public function __construct( $instance_id = 0 ) {
             $this->instance_id = absint( $instance_id );
@@ -49,7 +51,10 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             // API
             $this->api = new SLFW_Loggi_Api( $this );
 
-            // Save admin options.
+            // Hooks
+            add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+
+            // Save admin options
             add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
         }
 
@@ -122,6 +127,27 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
             // Register the rate
             $this->add_rate( $rate );
+        }
+
+        /**
+         * Action: 'admin_enqueue_scripts'
+         * Enqueue scripts or styles for gateway settings page.
+         *
+         * We do not validate page into actions because WooCommerce says:
+         * "Gateways are only loaded when needed, such as during checkout and on the settings page in admin"
+         *
+         * @link https://docs.woocommerce.com/document/payment-gateway-api/#section-8
+         *
+         * @return void
+         */
+        public function admin_enqueue_scripts() {
+            $version = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? uniqid() : SLFW_VERSION;
+
+            $file_url  = SLFW_PLUGIN_URL . '/modules/woocommerce/assets/build/js/loggi-shipping.min.js';
+            wp_enqueue_script( $this->id . '-loggi-shipping-script', $file_url, array( 'jquery' ), $version, true );
+
+            $file_url  = SLFW_PLUGIN_URL . '/modules/woocommerce/assets/build/css/loggi-shipping.min.css';
+            wp_enqueue_style( $this->id . '-loggi-shipping-style', $file_url, array(), $version );
         }
 
     }

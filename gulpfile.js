@@ -16,7 +16,7 @@ var dir_assets = 'modules/*/assets/';
  */
 function styles() {
     const rename_style = (path) => {
-        path.dirname   = path.dirname.replace( '\/scss', '\/css' );
+        path.dirname   = path.dirname.replace( '\/scss', '\/build\/css' );
         path.extname   = '.min.css';
     };
 
@@ -33,13 +33,16 @@ gulp.task( 'styles', styles );
 /**
  * TASK: scripts
  */
-const build_scripts = ['build/*.js', '!build/*.min.js'];
-
 function scripts() {
-    return gulp.src( build_scripts )
-        .pipe( rename( path => path.extname = '.min.js' ) )
+    const rename_scripts = (path) => {
+        path.dirname   = path.dirname.replace( '\/js', '\/build\/js' );
+        path.extname   = '.min.js';
+    };
+
+    return gulp.src( dir_assets + 'js/*.js' )
+        .pipe( rename( rename_scripts ) )
         .pipe( uglifyEs() )
-        .pipe( gulp.dest( 'build' ) );
+        .pipe( gulp.dest( 'modules' ) );
 }
 
 gulp.task( 'scripts', scripts );
@@ -52,7 +55,7 @@ gulp.task( 'scripts', scripts );
 
 function watch() {
     gulp.watch( dir_assets + 'scss/*.scss', gulp.series( 'styles' ) );
-    gulp.watch( build_scripts, gulp.series( 'scripts' ) );
+    gulp.watch( dir_assets + 'js/*.js', gulp.series( 'scripts' ) );
 }
 
 gulp.task( 'watch', watch );
@@ -66,6 +69,8 @@ var trunk_files = [
     './**/*',
     '!./modules/*/assets/scss/*',
     '!./modules/*/assets/scss',
+    '!./modules/*/assets/js/*',
+    '!./modules/*/assets/js',
     '!node_modules/**/*',
     '!vendor/**/*',
     '!*',

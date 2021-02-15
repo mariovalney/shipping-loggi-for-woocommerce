@@ -16,8 +16,7 @@ Thumbs.db
 node_modules
 vendor
 
-modules/*/assets/css/*.min.css
-modules/*/assets/js/*.min.js
+modules/*/assets/build
 
 trunk.zip
 
