@@ -92,6 +92,14 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'default'           => __( 'Loggi', 'shipping-loggi-for-woocommerce' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
+                'shipping_class_id'  => array(
+                    'type'        => 'select',
+                    'class'       => 'wc-enhanced-select',
+                    'title'       => __( 'Shipping Class', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'    => __( 'If necessary, select a shipping class to apply this method.', 'shipping-loggi-for-woocommerce' ),
+                    'default'     => '',
+                    'options'     => $this->get_shipping_classes_as_options(),
+                ),
                 'origin_section'    => array(
                     'type'        => 'title',
                     'title'       => __( 'Pickup Address', 'shipping-loggi-for-woocommerce' ),
@@ -116,6 +124,13 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'title'             => __( 'Complement', 'shipping-loggi-for-woocommerce' ),
                     'desc_tip'          => __( 'Complement is not required but you should provide details to make easy the pickup.', 'shipping-loggi-for-woocommerce' ),
                 ),
+                'pickup_postcode'   => array(
+                    'type'              => 'text',
+                    'title'             => __( 'Postcode', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Your address postcode or zipcode.', 'shipping-loggi-for-woocommerce' ),
+                    'placeholder'       => __( '99999-999', 'shipping-loggi-for-woocommerce' ),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
                 'pickup_city'       => array(
                     'type'              => 'text',
                     'title'             => __( 'City', 'shipping-loggi-for-woocommerce' ),
@@ -136,7 +151,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
                 'environment'        => array(
                     'type'              => 'select',
-                    'class'             => 'loggi-api-input',
+                    'class'             => 'loggi-api-input wc-enhanced-select',
                     'title'             => __( 'Environment', 'shipping-loggi-for-woocommerce' ),
                     'desc_tip'          => __( 'Loggi API environment. Use Staging for tests and Production for your running shop.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => 'staging',
@@ -200,6 +215,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
                 'shop'              => array(
                     'type'              => 'select',
+                    'class'             => 'wc-enhanced-select',
                     'title'             => __( 'Shop', 'shipping-loggi-for-woocommerce' ),
                     'desc_tip'          => __( 'The shop from Loggi dashboard. Maybe you should ask Loggi Support (contato.api@loggi.com) to create one.', 'shipping-loggi-for-woocommerce' ),
                     'description'       => $shop_description,
@@ -310,6 +326,27 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             }
 
             return $shops;
+        }
+
+
+        /**
+         * Get shipping classes as options.
+         *
+         * @return array
+         */
+        protected function get_shipping_classes_as_options() {
+            $shipping_classes = WC()->shipping->get_shipping_classes();
+
+            $options = array(
+                '-1' => __( 'Any Shipping Class', 'shipping-loggi-for-woocommerce' ),
+                '0'  => __( 'No Shipping Class', 'shipping-loggi-for-woocommerce' ),
+            );
+
+            if ( ! empty( $shipping_classes ) ) {
+                $options += wp_list_pluck( $shipping_classes, 'name', 'term_id' );
+            }
+
+            return $options;
         }
 
     }
