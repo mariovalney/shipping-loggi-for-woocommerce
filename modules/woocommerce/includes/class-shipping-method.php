@@ -93,7 +93,43 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'options'           => array(),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
-                'api_section'        => array(
+                'origin_section'    => array(
+                    'type'        => 'title',
+                    'title'       => __( 'Pickup Address', 'shipping-loggi-for-woocommerce' ),
+                ),
+                'pickup_address_1'  => array(
+                    'type'              => 'text',
+                    'title'             => __( 'Address 1', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Complete address line 1: address type, name and number.', 'shipping-loggi-for-woocommerce' ),
+                    'placeholder'       => __( 'Street Example with Number, 999', 'shipping-loggi-for-woocommerce' ),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
+                'pickup_address_2'  => array(
+                    'type'              => 'text',
+                    'title'             => __( 'Address 2', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Complete address line 2: neighborhood', 'shipping-loggi-for-woocommerce' ),
+                    'placeholder'       => __( 'My neighborhood', 'shipping-loggi-for-woocommerce' ),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
+                'pickup_complement' => array(
+                    'type'              => 'text',
+                    'title'             => __( 'Complement', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Complement is not required but you should provide details to make easy the pickup.', 'shipping-loggi-for-woocommerce' ),
+                ),
+                'pickup_city'       => array(
+                    'type'              => 'text',
+                    'title'             => __( 'City', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'The address city name.', 'shipping-loggi-for-woocommerce' ),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
+                'pickup_country'    => array(
+                    'type'              => 'single_select_country',
+                    'title'             => __( 'State and Country', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'The address city name.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => get_option( 'woocommerce_default_country' ),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
+                'api_section'       => array(
                     'type'        => 'title',
                     'title'       => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
                 ),
@@ -184,6 +220,16 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $this->instance_form_fields['shop']['options'] = $this->get_shops_as_options();
 
             return parent::get_admin_options_html();
+        }
+
+        public function generate_single_select_country_html( $key, $data ) {
+            $data['id'] = $this->get_field_key( $key );
+            $data['value'] = $this->get_option( $key );
+
+            ob_start();
+            WC_Admin_Settings::output_fields( array( $data ) );
+
+            return ob_get_clean();
         }
 
         /**
