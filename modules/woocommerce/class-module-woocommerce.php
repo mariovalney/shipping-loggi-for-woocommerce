@@ -1,5 +1,4 @@
 <?php
-
 /**
  * SLFW_Module_Woocommerce
  * Class responsible to manage all WooCommerce stuff

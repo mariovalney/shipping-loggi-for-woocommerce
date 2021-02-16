@@ -6,11 +6,15 @@ jQuery(document).ready(function($) {
     // Update Environment Fields
     $('body').on('update-environment.slfw', function(event) {
         const environment = $('[name="woocommerce_loggi-shipping_environment"]').val();
+
         $('[data-slfw-environment-field]').each(function(index, el) {
             const visible = $(this).attr('data-slfw-environment-field') === environment;
             $(this).parents('tr').toggle(visible);
             $(this).prop('required', visible);
         });
+
+        const api_description = $('.slfw-api-section-description');
+        api_description.toggle(! api_description.hasClass(environment));
     });
 
     $('[name="woocommerce_loggi-shipping_environment"]').on('change', function(event) {

@@ -47,6 +47,9 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
 
         /**
          * Request a API from e-mail and password
+         *
+         * @param string $email
+         * @param string $password
          * @return string
          */
         public function retrieve_api_key( $email, $password ) {
@@ -67,6 +70,47 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             $user = $response ? $response['user'] : array();
 
             return $user['apiKey'] ?? '';
+        }
+
+        /**
+         * Request a API from all shops
+         *
+         * @return array
+         */
+        public function retrieve_all_shops() {
+            $selection = array(
+                'edges' => array(
+                    'node' => array(
+                        'name',
+                        'pickupInstructions',
+                        'pk',
+                        'externalId',
+                        'address' => array(
+                            'pos',
+                            'addressSt',
+                            'addressData',
+                        ),
+                        'chargeOptions' => array(
+                            'label',
+                        ),
+                    ),
+                ),
+            );
+
+            $response = $this->make_request( 'allShops', array(), $selection );
+            $edges = $response ? $response['edges'] : array();
+
+            $shops = array();
+            foreach ( $edges as $node ) {
+                $node = $node['node'] ?? array();
+                if ( empty( $node['pk'] ) ) {
+                    continue;
+                }
+
+                $shops[ $node['pk'] ] = $node;
+            }
+
+            return $shops;
         }
 
         /**
@@ -146,7 +190,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             $parsed = '';
 
             foreach ( (array) $params as $key => $values ) {
-                $parsed .= sprintf( '%s:%s', $key, $this->json_encode( $values ) );
+                $parsed .= sprintf( '%s:%s', $key, $this->graphql_encode( $values, true ) );
             }
 
             return $parsed;
@@ -162,31 +206,39 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             $parsed = '';
 
             foreach ( (array) $selection as $key => $values ) {
-                $parsed .= sprintf( '%s %s', $key, $this->json_encode( $values ) );
+                $parsed .= sprintf( '%s %s', $key, $this->graphql_encode( $values ) );
             }
 
             return $parsed;
         }
 
-        private function json_encode( $object, $quotes = true ) {
-            if ( is_scalar( $object ) ) {
-                $object = (string) $object;
+        /**
+         * Encode a array to GraphQL pattern
+         *
+         * @param  array  $data
+         * @param  boolean $is_params
+         * @return string
+         */
+        private function graphql_encode( $data, $is_params = false ) {
+            if ( is_scalar( $data ) ) {
+                $data = (string) $data;
 
-                if ( $quotes ) {
-                    return '"' . $object . '"';
+                if ( $is_params ) {
+                    return '"' . $data . '"';
                 }
 
-                return $object;
+                return $data;
             }
 
             $parsed = array();
-            foreach ( (array) $object as $key => $values ) {
+            foreach ( (array) $data as $key => $values ) {
                 if ( is_numeric( $key ) ) {
-                    $parsed[] = $this->json_encode( $values, false );
+                    $parsed[] = $this->graphql_encode( $values, false );
                     continue;
                 }
 
-                $parsed[] = sprintf( '%s: %s', $key, $this->json_encode( $values ) );
+                $format = $is_params ? '%s:%s' : '%s %s';
+                $parsed[] = sprintf( $format, $key, $this->graphql_encode( $values, $is_params ) );
             }
 
             return sprintf( '{%s}', implode( ',', $parsed ) );

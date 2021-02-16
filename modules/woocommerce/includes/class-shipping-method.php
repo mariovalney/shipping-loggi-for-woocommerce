@@ -19,9 +19,13 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
         const ID = 'loggi-shipping';
 
         /**
+         * Available Shops
+         * @var array
+         */
+        protected $shops;
+
+        /**
          * The constructor
-         *
-         * @SuppressWarnings(PHPMD.MissingImport)
          */
         public function __construct( $instance_id = 0 ) {
             $this->instance_id = absint( $instance_id );
@@ -41,14 +45,10 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             // Load the form fields.
             $this->init_form_fields();
 
-            // Options
+            // Options and data
             $this->enabled     = $this->get_option( 'enabled' );
             $this->title       = $this->get_option( 'title', 'Loggi' );
-            $this->environment = $this->get_option( 'environment' );
             $this->debug       = $this->get_option( 'debug' );
-
-            // API
-            $this->api = new SLFW_Loggi_Api( $this->environment );
 
             // Save admin options
             add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -85,9 +85,17 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'default'           => __( 'Loggi', 'shipping-loggi-for-woocommerce' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
+                'shop'              => array(
+                    'type'              => 'select',
+                    'title'             => __( 'Shop', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'The shop from Loggi dashboard. Maybe you should ask Loggi Support (contato.api@loggi.com) to create one.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '0',
+                    'options'           => array(),
+                    'custom_attributes' => array( 'required' => 'required' ),
+                ),
                 'api_section'        => array(
-                    'type'  => 'title',
-                    'title' => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
+                    'type'        => 'title',
+                    'title'       => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
                 ),
                 'environment'        => array(
                     'type'              => 'select',
@@ -163,6 +171,22 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
         }
 
         /**
+         * Return admin options as a html string.
+         *
+         * @return string
+         */
+        public function get_admin_options_html() {
+            $environment = $this->get_option( 'environment' );
+
+            $this->instance_form_fields['api_section']['description'] = '<span class="slfw-api-section-description ' . esc_attr( $environment ) . '">' . __( 'Save your settings before continue.' ) . '</span>';
+
+            $this->instance_form_fields['shop']['custom_attributes']['data-slfw-environment-field'] = $environment;
+            $this->instance_form_fields['shop']['options'] = $this->get_shops_as_options();
+
+            return parent::get_admin_options_html();
+        }
+
+        /**
          * Calculate shipping rates
          *
          * @param mixed $package
@@ -178,6 +202,45 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
             // Register the rate
             $this->add_rate( $rate );
+        }
+
+        /**
+         * Create a instance to API
+         *
+         * @return SLFW_Loggi_Api
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
+         */
+        protected function api() {
+            $environment = $this->get_option( 'environment' );
+            $api_email = $this->get_option( $environment . '_api_email' );
+            $api_key = $this->get_option( $environment . '_api_key' );
+
+            return new SLFW_Loggi_Api( $environment, $api_email, $api_key );
+        }
+
+        /**
+         * Get all shops from API and create a option array
+         *
+         * @return array
+         */
+        private function get_shops_as_options() {
+            if ( ! is_null( $this->shops ) ) {
+                return $this->shops;
+            }
+
+            $shops = array();
+            $all_shops = $this->api()->retrieve_all_shops();
+
+            foreach ( $all_shops as $id => $shop ) {
+                $shops[ $id ] = sprintf( '(%s) %s', $id, ( $shop['name'] ?? '' ) );
+            }
+
+            if ( empty( $shops ) ) {
+                return array( '0' => __( 'You have any available shop.', 'shipping-loggi-for-woocommerce' ) );
+            }
+
+            return $shops;
         }
 
     }
