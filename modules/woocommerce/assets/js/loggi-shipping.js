@@ -12,9 +12,6 @@ jQuery(document).ready(function($) {
             $(this).parents('tr').toggle(visible);
             $(this).prop('required', visible);
         });
-
-        const api_description = $('.slfw-api-section-description');
-        api_description.toggle(! api_description.hasClass(environment));
     });
 
     $('[name="woocommerce_loggi-shipping_environment"]').on('change', function(event) {
@@ -22,6 +19,55 @@ jQuery(document).ready(function($) {
     });
 
     $('body').trigger('update-environment.slfw');
+
+    // Reload Shops
+    $('body').on('change', '.loggi-api-input', function(event) {
+        $('#slfw-reload-shops-description').show();
+
+        $('#woocommerce_loggi-shipping_shop').find('option').remove();
+        $('#woocommerce_loggi-shipping_shop').append('<option value="">' + __( 'Reload your stores.', 'shipping-loggi-for-woocommerce' ) + '</option>');
+    });
+
+    $('body').on('click', '#slfw-reload-shops-description a', function(event) {
+        event.preventDefault();
+
+        const select = $('#woocommerce_loggi-shipping_shop');
+
+        select.find('option').remove();
+        select.append('<option value="0">' + __( 'Loading...', 'shipping-loggi-for-woocommerce' ) + '</option>');
+
+        const environment = $('[name="woocommerce_loggi-shipping_environment"]').val();
+        const api_email = $('[name="woocommerce_loggi-shipping_' + environment + '_api_email"]').val();
+        const api_key = $('[name="woocommerce_loggi-shipping_' + environment + '_api_key"]').val();
+
+        // Request
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'slfw_all_shops_as_options',
+                environment: environment,
+                api_email: api_email,
+                api_key: api_key,
+                nonce: select.data('nonce')
+            },
+        })
+        .done(response => {
+            select.find('option').remove();
+            if (response.success && response.data) {
+                for (var i = 0; i < response.data.length; i++) {
+                    select.append('<option value="' + response.data[i].value + '">' + response.data[i].label + '</option>');
+                }
+                return;
+            }
+
+            select.append('<option value="0">' + __( 'You have any available shop.', 'shipping-loggi-for-woocommerce' ) + '</option>');
+        })
+        .fail(() => {
+            select.find('option').remove();
+            select.append('<option value="0">' + __( 'You have any available shop.', 'shipping-loggi-for-woocommerce' ) + '</option>');
+        });
+    });
 
     // Request for API Key
     $('.slfw-request-api-key').on('click', function(event) {

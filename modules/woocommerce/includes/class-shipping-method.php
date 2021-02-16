@@ -63,13 +63,20 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
          */
         public function init_form_fields() {
-            $api_key_debug_desc_tip = __( 'Require it sending a mail for Loggi Support (contato.api@loggi.com).', 'shipping-loggi-for-woocommerce' );
+            $api_key_desc_tip = __( 'Require it sending a mail for Loggi Support (contato.api@loggi.com).', 'shipping-loggi-for-woocommerce' );
 
-            $api_key_debug_description = sprintf(
+            $api_key_description = sprintf(
                 // translators: Link to open passsword form. Text is "click here".
                 __( '%s to use your password.', 'shipping-loggi-for-woocommerce' ),
                 '<a class="slfw-request-api-key" href="#">' . __( 'Click here', 'shipping-loggi-for-woocommerce' ) . '</a>',
             );
+
+            $shop_description = sprintf(
+                // translators: Link to open passsword form. Text is "click here".
+                __( '%s to reload your stores.', 'shipping-loggi-for-woocommerce' ),
+                '<a href="#">' . __( 'Click here', 'shipping-loggi-for-woocommerce' ) . '</a>',
+            );
+            $shop_description = '<span id="slfw-reload-shops-description">' . $shop_description . '</span>';
 
             $debug_description = sprintf(
                 // translators: link to logs page
@@ -85,17 +92,10 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'default'           => __( 'Loggi', 'shipping-loggi-for-woocommerce' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
-                'shop'              => array(
-                    'type'              => 'select',
-                    'title'             => __( 'Shop', 'shipping-loggi-for-woocommerce' ),
-                    'desc_tip'          => __( 'The shop from Loggi dashboard. Maybe you should ask Loggi Support (contato.api@loggi.com) to create one.', 'shipping-loggi-for-woocommerce' ),
-                    'default'           => '0',
-                    'options'           => array(),
-                    'custom_attributes' => array( 'required' => 'required' ),
-                ),
                 'origin_section'    => array(
                     'type'        => 'title',
                     'title'       => __( 'Pickup Address', 'shipping-loggi-for-woocommerce' ),
+                    'description' => __( 'From where you are going to send your packages.', 'shipping-loggi-for-woocommerce' ),
                 ),
                 'pickup_address_1'  => array(
                     'type'              => 'text',
@@ -125,16 +125,18 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 'pickup_country'    => array(
                     'type'              => 'single_select_country',
                     'title'             => __( 'State and Country', 'shipping-loggi-for-woocommerce' ),
-                    'desc_tip'          => __( 'The address city name.', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Select your country and state/region, if available.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => get_option( 'woocommerce_default_country' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
                 'api_section'       => array(
                     'type'        => 'title',
                     'title'       => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
+                    'description' => __( 'Connect your store with Loggi.', 'shipping-loggi-for-woocommerce' ),
                 ),
                 'environment'        => array(
                     'type'              => 'select',
+                    'class'             => 'loggi-api-input',
                     'title'             => __( 'Environment', 'shipping-loggi-for-woocommerce' ),
                     'desc_tip'          => __( 'Loggi API environment. Use Staging for tests and Production for your running shop.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => 'staging',
@@ -146,6 +148,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
                 'staging_api_email'    => array(
                     'type'              => 'email',
+                    'class'             => 'loggi-api-input',
                     'title'             => __( 'E-mail', 'shipping-loggi-for-woocommerce' ),
                     'desc_tip'          => __( 'The e-mail you use on Loggi Staging dashboard.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => '',
@@ -156,6 +159,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
                 'production_api_email' => array(
                     'type'              => 'email',
+                    'class'             => 'loggi-api-input',
                     'title'             => __( 'E-mail', 'shipping-loggi-for-woocommerce' ),
                     'desc_tip'          => __( 'The e-mail you use on Loggi Production dashboard.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => '',
@@ -166,9 +170,10 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
                 'staging_api_key'    => array(
                     'type'              => 'text',
+                    'class'             => 'loggi-api-input',
                     'title'             => __( 'API Key', 'shipping-loggi-for-woocommerce' ),
-                    'description'       => $api_key_debug_description,
-                    'desc_tip'          => __( 'For Staging.', 'shipping-loggi-for-woocommerce' ) . ' ' . $api_key_debug_desc_tip,
+                    'description'       => $api_key_description,
+                    'desc_tip'          => __( 'For Staging.', 'shipping-loggi-for-woocommerce' ) . ' ' . $api_key_desc_tip,
                     'default'           => '',
                     'custom_attributes' => array(
                         'required'                    => 'required',
@@ -180,9 +185,10 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
                 'production_api_key' => array(
                     'type'              => 'text',
+                    'class'             => 'loggi-api-input',
                     'title'             => __( 'API Key', 'shipping-loggi-for-woocommerce' ),
-                    'description'       => $api_key_debug_description,
-                    'desc_tip'          => __( 'For Production.', 'shipping-loggi-for-woocommerce' ) . ' ' . $api_key_debug_desc_tip,
+                    'description'       => $api_key_description,
+                    'desc_tip'          => __( 'For Production.', 'shipping-loggi-for-woocommerce' ) . ' ' . $api_key_desc_tip,
                     'default'           => '',
                     'custom_attributes' => array(
                         'required'                    => 'required',
@@ -190,6 +196,18 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                         'data-email-input'            => 'woocommerce_' . $this->id . '_production_api_email',
                         'data-environment'            => 'production',
                         'data-nonce'                  => wp_create_nonce( 'slfw-request-api-key' ),
+                    ),
+                ),
+                'shop'              => array(
+                    'type'              => 'select',
+                    'title'             => __( 'Shop', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'The shop from Loggi dashboard. Maybe you should ask Loggi Support (contato.api@loggi.com) to create one.', 'shipping-loggi-for-woocommerce' ),
+                    'description'       => $shop_description,
+                    'default'           => '0',
+                    'options'           => array(),
+                    'custom_attributes' => array(
+                        'required'   => 'required',
+                        'data-nonce' => wp_create_nonce( 'slfw-all-shops-as-options' ),
                     ),
                 ),
                 'advanced_section'   => array(
@@ -212,16 +230,21 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          * @return string
          */
         public function get_admin_options_html() {
-            $environment = $this->get_option( 'environment' );
-
-            $this->instance_form_fields['api_section']['description'] = '<span class="slfw-api-section-description ' . esc_attr( $environment ) . '">' . __( 'Save your settings before continue.' ) . '</span>';
-
-            $this->instance_form_fields['shop']['custom_attributes']['data-slfw-environment-field'] = $environment;
             $this->instance_form_fields['shop']['options'] = $this->get_shops_as_options();
 
             return parent::get_admin_options_html();
         }
 
+        /**
+         * Generate a select to country-state
+         *
+         * @see WC_Settings_API->generate_settings_html()
+         * @see WC_Admin_Settings->output_fields()
+         *
+         * @param  string $key
+         * @param  array $data
+         * @return string
+         */
         public function generate_single_select_country_html( $key, $data ) {
             $data['id'] = $this->get_field_key( $key );
             $data['value'] = $this->get_option( $key );

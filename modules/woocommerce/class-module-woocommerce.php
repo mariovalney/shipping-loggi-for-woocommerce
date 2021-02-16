@@ -51,6 +51,7 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             $this->core->add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 99 );
 
             $this->core->add_action( 'wp_ajax_slfw_request_api_key', array( $this, 'wp_ajax_slfw_request_api_key' ), 99 );
+            $this->core->add_action( 'wp_ajax_slfw_all_shops_as_options', array( $this, 'wp_ajax_slfw_all_shops_as_options' ), 99 );
         }
 
         /**
@@ -103,6 +104,44 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             }
 
             wp_send_json_success( $api_key );
+        }
+
+        /**
+         * Action: 'wp_ajax_slfw_all_shops_as_options'
+         * List all available shops to create a select.
+         *
+         * @return void
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
+         */
+        public function wp_ajax_slfw_all_shops_as_options() {
+            check_ajax_referer( 'slfw-all-shops-as-options', 'nonce' );
+
+            $api_email = sanitize_text_field( $_POST['api_email'] ?? '' );
+            $api_key = sanitize_text_field( $_POST['api_key'] ?? '' );
+            $environment = sanitize_text_field( $_POST['environment'] ?? '' );
+
+            if ( empty( $api_email ) || empty( $api_key ) || empty( $environment ) ) {
+                wp_send_json_error();
+            }
+
+            $shops = array();
+
+            $api = new SLFW_Loggi_Api( $environment, $api_email, $api_key );
+            $all_shops = $api->retrieve_all_shops();
+
+            foreach ( $all_shops as $id => $shop ) {
+                $shops[] = array(
+                    'value' => $id,
+                    'label' => sprintf( '(%s) %s', $id, ( $shop['name'] ?? '' ) ),
+                );
+            }
+
+            if ( empty( $shops ) ) {
+                wp_send_json_error();
+            }
+
+            wp_send_json_success( $shops );
         }
 
         /**
