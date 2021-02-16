@@ -53,6 +53,10 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @return string
          */
         public function retrieve_api_key( $email, $password ) {
+            if ( ! $this->can_make_request( true ) ) {
+                return '';
+            }
+
             $params = array(
                 'input' => array(
                     'email' => $email,
@@ -78,6 +82,10 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @return array
          */
         public function retrieve_all_shops() {
+            if ( ! $this->can_make_request() ) {
+                return array();
+            }
+
             $selection = array(
                 'edges' => array(
                     'node' => array(
@@ -159,6 +167,24 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             }
 
             return $response['data'][ $name ] ?? false;
+        }
+
+        /**
+         * Check all data was provided to API
+         *
+         * @param boolean $ignore_credentials
+         * @return boolean
+         */
+        private function can_make_request( $ignore_credentials = false ) {
+            if ( empty( $this->environment ) ) {
+                return false;
+            }
+
+            if ( empty( $this->api_email ) || empty( $this->api_key ) ) {
+                return $ignore_credentials;
+            }
+
+            return true;
         }
 
         /**

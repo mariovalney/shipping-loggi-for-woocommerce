@@ -22,6 +22,14 @@ jQuery(document).ready(function($) {
 
     // Reload Shops
     $('body').on('change', '.loggi-api-input', function(event) {
+        const environment = $('[name="woocommerce_loggi-shipping_environment"]').val();
+        const api_email = $('[name="woocommerce_loggi-shipping_' + environment + '_api_email"]').val();
+        const api_key = $('[name="woocommerce_loggi-shipping_' + environment + '_api_key"]').val();
+
+        if ( ! api_email || ! api_key ) {
+            return;
+        }
+
         $('#slfw-reload-shops-description').show();
 
         $('#woocommerce_loggi-shipping_shop').find('option').remove();
