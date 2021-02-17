@@ -16,6 +16,8 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
 
     class SLFW_Loggi_Api {
 
+        use SLFW_Has_Logger;
+
         /**
          * The environment
          * @var string
@@ -39,10 +41,11 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          *
          * @param string $environment
          */
-        public function __construct( $environment, $api_email = '', $api_key = '' ) {
+        public function __construct( $environment, $api_email = '', $api_key = '', $logger = null ) {
             $this->environment = $environment;
             $this->api_email = $api_email;
             $this->api_key = $api_key;
+            $this->logger = $logger;
         }
 
         /**
@@ -230,14 +233,23 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
 
             // Check for errors
             if ( ! empty( $response['errors'] ) ) {
-                foreach ( $response['errors'] as $error ) {
-                    error_log( $error['message'] ?? '' );
-                }
+                $data = array(
+                    'request'  => $args,
+                    'response' => $response,
+                );
+
+                $this->log( '[Loggi Api] Error: "' . $name . '"', $data );
 
                 return false;
             }
 
             if ( empty( $response['data'] ) ) {
+                $data = array(
+                    'request'  => $args,
+                    'response' => $response,
+                );
+
+                $this->log( '[Loggi Api] Empty data: "' . $name . '"', $data );
                 return false;
             }
 

@@ -16,6 +16,12 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
     class SLFW_Shipping_Method extends WC_Shipping_Method {
 
+        use SLFW_Has_Logger;
+
+        /**
+         * The shipping method ID
+         * @var string
+         */
         const ID = 'loggi-shipping';
 
         /**
@@ -26,6 +32,8 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
         /**
          * The constructor
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
          */
         public function __construct( $instance_id = 0 ) {
             $this->instance_id = absint( $instance_id );
@@ -46,9 +54,13 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $this->init_form_fields();
 
             // Options and data
-            $this->enabled     = $this->get_option( 'enabled' );
-            $this->title       = $this->get_option( 'title', 'Loggi' );
-            $this->debug       = $this->get_option( 'debug' );
+            $this->enabled = $this->get_option( 'enabled' );
+            $this->title   = $this->get_option( 'title', 'Loggi' );
+
+            // Log
+            if ( $this->get_option( 'debug', 'no' ) === 'yes' ) {
+                $this->logger = new WC_Logger();
+            }
 
             // Save admin options
             add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -291,11 +303,22 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          * @SuppressWarnings(PHPMD.MissingImport)
          */
         public function calculate_shipping( $package = array() ) {
+            $destination = $this->format_address( $package['destination'] );
+            if ( empty( $destination ) ) {
+                $this->log( '[calculate_shipping] Destination is empty.' );
+                return;
+            }
+
             $shopId = $this->get_option( 'shop' );
             $pickup = $this->get_pickup_address();
-            $destination = $this->format_address( $package['destination'] );
 
-            if ( empty( $shopId ) || empty( $pickup ) || empty( $destination ) ) {
+            if ( empty( $shopId ) ) {
+                $this->log( '[calculate_shipping] Invalid ShopId: ' . $shopId );
+                return;
+            }
+
+            if ( empty( $pickup ) ) {
+                $this->log( '[calculate_shipping] Invalid pickup address:', $pickup );
                 return;
             }
 
@@ -306,11 +329,23 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $boxes = $loggi_package->get_boxes();
 
             if ( ! $loggi_package->can_be_delivered() ) {
+                $data = array(
+                    'package' => $package,
+                    'loggi'   => $boxes,
+                );
+
+                $this->log( '[calculate_shipping] Package cannot be delivered:', $data );
                 return;
             }
 
             $estimation = $this->api()->retrieve_order_estimation( $shopId, $pickup, $destination, $boxes );
             if ( empty( $estimation ) || empty( $estimation['totalEstimate'] ) ) {
+                $data = array(
+                    'order'      => $package,
+                    'estimation' => $estimation,
+                );
+
+                $this->log( '[calculate_shipping] Estimation is empty:', $data );
                 return;
             }
 
@@ -339,7 +374,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $api_email = $this->get_option( $environment . '_api_email' );
             $api_key = $this->get_option( $environment . '_api_key' );
 
-            return new SLFW_Loggi_Api( $environment, $api_email, $api_key );
+            return new SLFW_Loggi_Api( $environment, $api_email, $api_key, $this->logger );
         }
 
         /**
