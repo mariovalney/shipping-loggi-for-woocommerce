@@ -17,31 +17,30 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
     class SLFW_Loggi_Package {
 
         /**
-         * The max height for a package
-         * @link https://ajuda.loggi.com/hc/pt-br/articles/115001947367-Quero-enviar-um-pacote-qual-o-tamanho-m%C3%A1ximo-permitido-
+         * The max height for a package in cm
          *
-         * @var float
+         * @var int
          */
-        const MAX_HEIGHT = 22;
+        const MAX_HEIGHT = 55;
 
         /**
          * The max width for a package in cm
          *
-         * @var float
+         * @var int
          */
-        const MAX_WIDTH = 20;
+        const MAX_WIDTH = 55;
 
         /**
          * The max length for a package in cm
          *
-         * @var float
+         * @var int
          */
-        const MAX_LENGTH = 34;
+        const MAX_LENGTH = 55;
 
         /**
          * The max weight for a package in g
          *
-         * @var float
+         * @var int
          */
         const MAX_WEIGHT = 20000;
 

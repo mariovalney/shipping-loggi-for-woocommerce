@@ -339,19 +339,19 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             }
 
             $estimation = $this->api()->retrieve_order_estimation( $shopId, $pickup, $destination, $boxes );
-            if ( empty( $estimation ) || empty( $estimation['totalEstimate'] ) ) {
+            if ( empty( $estimation ) || empty( $estimation['cost'] ) || ! empty( $estimation['errors'] ) ) {
                 $data = array(
                     'order'      => $package,
                     'estimation' => $estimation,
                 );
 
-                $this->log( '[calculate_shipping] Estimation is empty:', $data );
+                $this->log( '[calculate_shipping] Estimation: ', $data );
                 return;
             }
 
             $rate = array(
                 'label'     => $this->title,
-                'cost'      => (float) $estimation['totalEstimate']['totalCost'],
+                'cost'      => (float) $estimation['cost'],
                 'taxes'     => false,
                 'meta_data' => array(
                     'loggi_estimation' => $estimation,

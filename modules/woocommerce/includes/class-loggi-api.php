@@ -130,10 +130,37 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @return array
          */
         public function retrieve_order_estimation( $shopId, $pickup, $destination, $packages ) {
-            if ( ! $this->can_make_request() ) {
+            if ( ! $this->can_make_request() || empty( $packages ) ) {
                 return array();
             }
 
+            $estimation = array(
+                'cost'     => 0,
+                'packages' => array(),
+                'errors'   => array(),
+            );
+
+            foreach ( array_chunk( $packages, 2 ) as $group ) {
+                $response = $this->request_order_estimation( $shopId, $pickup, $destination, $group );
+
+                if ( empty( $response ) || empty( $response['totalEstimate'] ) ) {
+                    return array();
+                }
+
+                $estimation['cost'] += (float) $response['totalEstimate']['totalCost'];
+                $estimation['packages'] = array_merge( $estimation['packages'], $response['ordersEstimate'] );
+                $estimation['errors'] = array_merge( $estimation['errors'], $response['packagesWithErrors'] );
+            }
+
+            return $estimation;
+        }
+
+        /**
+         * Request a API from all shops
+         *
+         * @return array
+         */
+        protected function request_order_estimation( $shopId, $pickup, $destination, $packages ) {
             $params = array(
                 'shopId'  => (int) $shopId,
                 'pickups' => array(
@@ -151,7 +178,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 $params['packages'][] = array(
                     'pickupIndex' => 0,
                     'recipient'   => array(
-                        'name'  => 'Cliente A',
+                        'name'  => 'Customer',
                         'phone' => '11999999999',
                     ),
                     'address'     => array(
