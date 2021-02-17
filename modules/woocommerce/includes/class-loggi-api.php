@@ -49,7 +49,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
         }
 
         /**
-         * Request a API from e-mail and password
+         * Request a API KEY from e-mail and password
          *
          * @param string $email
          * @param string $password
@@ -80,7 +80,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
         }
 
         /**
-         * Request a API from all shops
+         * Request a list of all shops to API
          *
          * @return array
          */
@@ -125,8 +125,13 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
         }
 
         /**
-         * Request a API from all shops
+         * Request a order estimation to API
+         * Already considering the limit of 2 packages by requisition.
          *
+         * @param string $shopId
+         * @param array $pickup
+         * @param array $destination
+         * @param array $packages
          * @return array
          */
         public function retrieve_order_estimation( $shopId, $pickup, $destination, $packages ) {
@@ -135,9 +140,10 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             }
 
             $estimation = array(
-                'cost'     => 0,
-                'packages' => array(),
-                'errors'   => array(),
+                'cost'        => 0,
+                'packages'    => array(),
+                'errors'      => array(),
+                'estimations' => array(),
             );
 
             foreach ( array_chunk( $packages, 2 ) as $group ) {
@@ -150,14 +156,22 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 $estimation['cost'] += (float) $response['totalEstimate']['totalCost'];
                 $estimation['packages'] = array_merge( $estimation['packages'], $response['ordersEstimate'] );
                 $estimation['errors'] = array_merge( $estimation['errors'], $response['packagesWithErrors'] );
+                $estimation['estimations'][] = $response;
             }
 
             return $estimation;
         }
 
         /**
-         * Request a API from all shops
+         * Request a order estimation to API
+         * Will not consider the limitation of packages.
          *
+         * @see retrieve_order_estimation()
+         *
+         * @param string $shopId
+         * @param array $pickup
+         * @param array $destination
+         * @param array $packages
          * @return array
          */
         protected function request_order_estimation( $shopId, $pickup, $destination, $packages ) {
@@ -229,7 +243,10 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
         /**
          * Make a request to API
          *
-         * @param string $type
+         * @param string $name
+         * @param array $params
+         * @param array $selection
+         * @param string $operation
          * @return string
          */
         protected function make_request( $name, $params = array(), $selection = array(), $operation = '' ) {
@@ -307,7 +324,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @param  string $name
          * @param  mixed $params
          * @param  mixed $selection
-         * @param  mixed $operation
+         * @param  string $operation
          * @return string
          */
         private function parse_operation( $name, $params, $selection, $operation ) {
@@ -343,7 +360,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
         /**
          * Parse the operation selection
          *
-         * @param  array $params
+         * @param  array $selection
          * @return string
          */
         private function parse_selection( $selection ) {
