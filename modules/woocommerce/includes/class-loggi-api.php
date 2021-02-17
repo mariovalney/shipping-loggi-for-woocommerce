@@ -122,12 +122,87 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
         }
 
         /**
+         * Request a API from all shops
+         *
+         * @return array
+         */
+        public function retrieve_order_estimation( $shopId, $pickup, $destination, $packages ) {
+            if ( ! $this->can_make_request() ) {
+                return array();
+            }
+
+            $params = array(
+                'shopId'  => (int) $shopId,
+                'pickups' => array(
+                    array(
+                        'address' => array(
+                            'address'    => $pickup['address'] ?? '',
+                            'complement' => $pickup['complement'] ?? '',
+                        ),
+                    ),
+                ),
+                'packages' => array(),
+            );
+
+            foreach ( $packages as $package ) {
+                $params['packages'][] = array(
+                    'pickupIndex' => 0,
+                    'recipient'   => array(
+                        'name'  => 'Cliente A',
+                        'phone' => '11999999999',
+                    ),
+                    'address'     => array(
+                        'address'    => $destination['address'] ?? '',
+                        'complement' => $destination['complement'] ?? '',
+                    ),
+                    'dimensions'  => array(
+                        'width'  => $package['width'],
+                        'height' => $package['height'],
+                        'weight' => $package['weight'],
+                        'length' => $package['length'],
+                    ),
+                );
+            }
+
+            $selection = array(
+                'totalEstimate' => array(
+                    'totalCost',
+                    'totalEta',
+                    'totalDistance',
+                ),
+                'ordersEstimate' => array(
+                    'packages' => array(
+                        'isReturn',
+                        'cost',
+                        'eta',
+                        'outOfCoverageArea',
+                        'outOfCityCover',
+                        'originalIndex',
+                        'resolvedAddress',
+                    ),
+                    'optimized' => array(
+                        'cost',
+                        'eta',
+                        'distance',
+                    ),
+                ),
+                'packagesWithErrors' => array(
+                    'originalIndex',
+                    'error',
+                    'resolvedAddress',
+                ),
+            );
+
+            return $this->make_request( 'estimateCreateOrder', $params, $selection, 'query' );
+        }
+
+        /**
          * Make a request to API
          *
          * @param string $type
          * @return string
          */
-        protected function make_request( $name, $params = array(), $selection = array() ) {
+        protected function make_request( $name, $params = array(), $selection = array(), $operation = '' ) {
             $args = array(
                 'timeout' => 60,
                 'blocking' => true,
@@ -136,7 +211,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 ),
                 'body' => json_encode(
                     array(
-                        'query' => $this->parse_operation( $name, $params, $selection ),
+                        'query' => $this->parse_operation( $name, $params, $selection, $operation ),
                     )
                 ),
             );
@@ -193,17 +268,18 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @param  string $name
          * @param  mixed $params
          * @param  mixed $selection
+         * @param  mixed $operation
          * @return string
          */
-        private function parse_operation( $name, $params, $selection ) {
+        private function parse_operation( $name, $params, $selection, $operation ) {
             $params = $this->parse_params( $params );
             $selection = $this->parse_selection( $selection );
 
             if ( ! empty( $params ) ) {
-                return sprintf( 'mutation {%s(%s) {%s}}', $name, $params, $selection );
+                return sprintf( '%s {%s(%s) {%s}}', $operation ? $operation : 'mutation', $name, $params, $selection );
             }
 
-            return sprintf( 'query {%s {%s}}', $name, $selection );
+            return sprintf( '%s {%s {%s}}', $operation ? $operation : 'query', $name, $selection );
         }
 
         /**
@@ -218,6 +294,9 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             foreach ( (array) $params as $key => $values ) {
                 $parsed .= sprintf( '%s:%s', $key, $this->graphql_encode( $values, true ) );
             }
+
+            $parsed = preg_replace( '/(^|[^,{]+){({+)/', '$1[$2', $parsed );
+            $parsed = preg_replace( '/(}+)}([^,}]+|$)/', '$1]$2', $parsed );
 
             return $parsed;
         }
@@ -247,9 +326,9 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          */
         private function graphql_encode( $data, $is_params = false ) {
             if ( is_scalar( $data ) ) {
-                $data = (string) $data;
+                $data = $data;
 
-                if ( $is_params ) {
+                if ( $is_params && is_string( $data ) ) {
                     return '"' . $data . '"';
                 }
 
@@ -259,15 +338,17 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             $parsed = array();
             foreach ( (array) $data as $key => $values ) {
                 if ( is_numeric( $key ) ) {
-                    $parsed[] = $this->graphql_encode( $values, false );
+                    $parsed[] = $this->graphql_encode( $values, $is_params );
                     continue;
                 }
 
-                $format = $is_params ? '%s:%s' : '%s %s';
+                $format = $is_params ? '%s: %s' : '%s %s';
                 $parsed[] = sprintf( $format, $key, $this->graphql_encode( $values, $is_params ) );
             }
 
-            return sprintf( '{%s}', implode( ',', $parsed ) );
+            $parsed = sprintf( '{%s}', implode( ( $is_params ? ',' : ' ' ), $parsed ) );
+
+            return $parsed;
         }
 
         /**

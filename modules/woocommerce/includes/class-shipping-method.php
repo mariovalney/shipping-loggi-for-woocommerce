@@ -92,13 +92,24 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'default'           => __( 'Loggi', 'shipping-loggi-for-woocommerce' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
-                'shipping_class_id'  => array(
-                    'type'        => 'select',
+                'shipping_classes'   => array(
+                    'type'        => 'multiselect',
                     'class'       => 'wc-enhanced-select',
-                    'title'       => __( 'Shipping Class', 'shipping-loggi-for-woocommerce' ),
-                    'desc_tip'    => __( 'If necessary, select a shipping class to apply this method.', 'shipping-loggi-for-woocommerce' ),
+                    'title'       => __( 'Shipping Classes', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'    => __( 'You can select "No Shipping Class" and/or how much shipping classes you want to use with Loggi.', 'shipping-loggi-for-woocommerce' ),
                     'default'     => '',
                     'options'     => $this->get_shipping_classes_as_options(),
+                ),
+                'merge_boxes'        => array(
+                    'type'        => 'select',
+                    'class'       => 'wc-enhanced-select',
+                    'title'       => __( 'Try to Merge Boxes', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'    => __( 'We will try to agrupate items inside one delivery, if they are inside the limits of Loggi.', 'shipping-loggi-for-woocommerce' ),
+                    'default'     => '0',
+                    'options'     => array(
+                        '0' => __( 'No', 'shipping-loggi-for-woocommerce' ),
+                        '1' => __( 'Yes', 'shipping-loggi-for-woocommerce' ),
+                    ),
                 ),
                 'origin_section'    => array(
                     'type'        => 'title',
@@ -276,13 +287,40 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          *
          * @param mixed $package
          * @return void
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
          */
         public function calculate_shipping( $package = array() ) {
+            $shopId = $this->get_option( 'shop' );
+            $pickup = $this->get_pickup_address();
+            $destination = $this->format_address( $package['destination'] );
+
+            if ( empty( $shopId ) || empty( $pickup ) || empty( $destination ) ) {
+                return;
+            }
+
+            $shipping_classes = (array) $this->get_option( 'shipping_classes', array() );
+            $merge_boxes = $this->get_option( 'merge_boxes', '0' ) === '1';
+
+            $loggi_package = new SLFW_Loggi_Package( $package, $shipping_classes, $merge_boxes );
+            $boxes = $loggi_package->get_boxes();
+
+            if ( ! $loggi_package->can_be_delivered() ) {
+                return;
+            }
+
+            $estimation = $this->api()->retrieve_order_estimation( $shopId, $pickup, $destination, $boxes );
+            if ( empty( $estimation ) || empty( $estimation['totalEstimate'] ) ) {
+                return;
+            }
+
             $rate = array(
                 'label'     => $this->title,
-                'cost'      => 20.00,
+                'cost'      => (float) $estimation['totalEstimate']['totalCost'],
                 'taxes'     => false,
-                'meta_data' => array(),
+                'meta_data' => array(
+                    'loggi_estimation' => $estimation,
+                ),
             );
 
             // Register the rate
@@ -305,11 +343,72 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
         }
 
         /**
+         * Get the pickup address formated as string
+         *
+         * @return array
+         */
+        protected function get_pickup_address() {
+            $country = $this->get_option( 'pickup_country' );
+            $country = explode( ':', $country, 2 );
+
+            $countries = WC()->countries->get_countries();
+
+            $pickup_country = $countries[ $country[0] ] ?? $country[0];
+            $pickup_state = $country[1] ?? '';
+
+            $address = array(
+                'address_1'  => $this->get_option( 'pickup_address_1' ),
+                'address_2'  => $this->get_option( 'pickup_address_2' ),
+                'complement' => $this->get_option( 'pickup_complement' ),
+                'postcode'   => $this->get_option( 'pickup_postcode' ),
+                'city'       => $this->get_option( 'pickup_city' ),
+                'state'      => $pickup_state,
+                'country'    => $pickup_country,
+            );
+
+            return $this->format_address( $address );
+        }
+
+        /**
+         * Get the pickup address formated as string
+         *
+         * @param array $address
+         * @return string
+         */
+        protected function format_address( $address ) {
+            $default = array(
+                'address_1'  => '',
+                'address_2'  => '',
+                'complement' => '',
+                'postcode'   => '',
+                'city'       => '',
+                'state'      => '',
+                'country'    => '',
+            );
+
+            $address = wp_parse_args( (array) $address, $default );
+            $address['postcode'] = preg_replace( '/\D/', '', (string) $address['postcode'] );
+
+            $line_2 = array( $address['address_2'], $address['city'] );
+            $line_2 = implode( ', ', array_filter( $line_2 ) );
+
+            $line_3 = array( $address['state'], $address['country'], $address['postcode'] );
+            $line_3 = implode( ', ', array_filter( $line_3 ) );
+
+            $formated = array( $address['address_1'], $line_2, $line_3 );
+
+            return array(
+                'address'    => implode( ' - ', array_filter( $formated ) ),
+                'complement' => $address['complement'],
+            );
+        }
+
+        /**
          * Get all shops from API and create a option array
          *
          * @return array
          */
-        private function get_shops_as_options() {
+        protected function get_shops_as_options() {
             if ( ! is_null( $this->shops ) ) {
                 return $this->shops;
             }
@@ -337,10 +436,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
         protected function get_shipping_classes_as_options() {
             $shipping_classes = WC()->shipping->get_shipping_classes();
 
-            $options = array(
-                '-1' => __( 'Any Shipping Class', 'shipping-loggi-for-woocommerce' ),
-                '0'  => __( 'No Shipping Class', 'shipping-loggi-for-woocommerce' ),
-            );
+            $options = array( '-1' => __( 'No Shipping Class', 'shipping-loggi-for-woocommerce' ) );
 
             if ( ! empty( $shipping_classes ) ) {
                 $options += wp_list_pluck( $shipping_classes, 'name', 'term_id' );
