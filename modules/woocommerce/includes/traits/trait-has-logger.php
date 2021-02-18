@@ -35,11 +35,26 @@ if ( ! trait_exists( 'SLFW_Has_Logger' ) ) {
                 return;
             }
 
+            $log_message = $message;
             if ( ! empty( $data ) ) {
-                $message .= "\n" . print_r( $data, true );
+                $log_message .= "\n" . print_r( $data, true );
             }
 
-            $this->logger->add( SLFW_Shipping_Method::ID, $message );
+            /**
+             * Filter: 'slfw_log_message'
+             *
+             * You can change the rate args before add to cart.
+             * Return empty to remove.
+             *
+             * @param string $log_message
+             * @param string $message
+             * @param array $data
+             *
+             * @var string
+             */
+            $log_message = apply_filters( 'slfw_log_message', $log_message, $message, $data );
+
+            $this->logger->add( SLFW_Shipping_Method::ID, $log_message );
         }
 
     }

@@ -96,7 +96,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 '<a href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=logs&log_file=' . esc_attr( $this->id ) . '-' . sanitize_file_name( wp_hash( $this->id ) ) . '.log' ) ) . '" target="_blank">' . __( 'System Status &gt; Logs', WCB_TEXTDOMAIN ) . '</a>'
             );
 
-            $this->instance_form_fields = array(
+            $main_form_fields = array(
                 'title'              => array(
                     'type'              => 'text',
                     'title'             => __( 'Title', 'shipping-loggi-for-woocommerce' ),
@@ -123,6 +123,9 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                         '1' => __( 'Yes', 'shipping-loggi-for-woocommerce' ),
                     ),
                 ),
+            );
+
+            $pickup_form_fields = array(
                 'origin_section'    => array(
                     'type'        => 'title',
                     'title'       => __( 'Pickup Address', 'shipping-loggi-for-woocommerce' ),
@@ -167,6 +170,9 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'default'           => get_option( 'woocommerce_default_country' ),
                     'custom_attributes' => array( 'required' => 'required' ),
                 ),
+            );
+
+            $api_form_fields = array(
                 'api_section'       => array(
                     'type'        => 'title',
                     'title'       => __( 'API Settings', 'shipping-loggi-for-woocommerce' ),
@@ -249,6 +255,9 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                         'data-nonce' => wp_create_nonce( 'slfw-all-shops-as-options' ),
                     ),
                 ),
+            );
+
+            $advanced_form_fields = array(
                 'advanced_section'   => array(
                     'type'  => 'title',
                     'title' => __( 'Advanced Settings', 'shipping-loggi-for-woocommerce' ),
@@ -261,6 +270,50 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'default'     => 'no',
                 ),
             );
+
+            /**
+             * Filter: 'slfw_form_fields_after_main'
+             *
+             * @param array $fields
+             * @param SLFW_Shipping_Method $shipping_method
+             *
+             * @var array
+             */
+            $form_fields_after_main = apply_filters( 'slfw_form_fields_after_main', array(), $this );
+
+            /**
+             * Filter: 'slfw_form_fields_after_pickup'
+             *
+             * @param array $fields
+             * @param SLFW_Shipping_Method $shipping_method
+             *
+             * @var array
+             */
+            $form_fields_after_pickup = apply_filters( 'slfw_form_fields_after_pickup', array(), $this );
+
+            /**
+             * Filter: 'slfw_form_fields_after_api'
+             *
+             * @param array $fields
+             * @param SLFW_Shipping_Method $shipping_method
+             *
+             * @var array
+             */
+            $form_fields_after_api = apply_filters( 'slfw_form_fields_after_api', array(), $this );
+
+            /**
+             * Finally the form fields
+             * We are using array_diff_key() to avoid developers removing core fields
+             */
+            $this->instance_form_fields = array_merge(
+                $main_form_fields,
+                array_diff_key( $form_fields_after_main, $main_form_fields, $pickup_form_fields, $api_form_fields, $advanced_form_fields ),
+                $pickup_form_fields,
+                array_diff_key( $form_fields_after_pickup, $main_form_fields, $pickup_form_fields, $api_form_fields, $advanced_form_fields ),
+                $api_form_fields,
+                array_diff_key( $form_fields_after_api, $main_form_fields, $pickup_form_fields, $api_form_fields, $advanced_form_fields ),
+                $advanced_form_fields
+            );
         }
 
         /**
@@ -270,6 +323,13 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          */
         public function get_admin_options_html() {
             $this->instance_form_fields['shop']['options'] = $this->get_shops_as_options();
+
+            /**
+             * Action: 'slfw_before_get_admin_options_html'
+             *
+             * @param SLFW_Shipping_Method $shipping_method
+             */
+            do_action( 'slfw_before_get_admin_options_html', $this );
 
             return parent::get_admin_options_html();
         }
@@ -358,6 +418,24 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 ),
             );
 
+            /**
+             * Filter: 'slfw_calculate_shipping_rate'
+             *
+             * You can change the rate args before add to cart.
+             * Return empty to remove.
+             *
+             * @param array $rate
+             * @param array $estimation
+             * @param array $package
+             *
+             * @var array
+             */
+            $rate = apply_filters( 'slfw_calculate_shipping_rate', $rate, $estimation, $package );
+
+            if ( empty( $rate ) ) {
+                return;
+            }
+
             // Register the rate
             $this->add_rate( $rate );
         }
@@ -401,6 +479,16 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 'country'    => $pickup_country,
             );
 
+            /**
+             * Filter: 'slfw_pickup_address'
+             *
+             * @param array $address
+             * @param SLFW_Shipping_Method $shipping_method
+             *
+             * @var array
+             */
+            $address = apply_filters( 'slfw_pickup_address', $address, $this );
+
             return $this->format_address( $address );
         }
 
@@ -432,10 +520,21 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
             $formated = array( $address['address_1'], $line_2, $line_3 );
 
-            return array(
+            $formated = array(
                 'address'    => implode( ' - ', array_filter( $formated ) ),
                 'complement' => $address['complement'],
             );
+
+            /**
+             * Filter: 'slfw_format_address'
+             *
+             * @param array $formated
+             * @param array $address
+             * @param SLFW_Shipping_Method $shipping_method
+             *
+             * @var array
+             */
+            return apply_filters( 'slfw_format_address', $formated, $address, $this );
         }
 
         /**

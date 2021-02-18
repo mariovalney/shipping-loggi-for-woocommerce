@@ -76,7 +76,15 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
             $response = $this->make_request( 'login', $params, $selection );
             $user = $response ? $response['user'] : array();
 
-            return $user['apiKey'] ?? '';
+            /**
+             * Filter: 'slfw_api_retrieve_api_key'
+             *
+             * @param array $apiKey
+             * @param SLFW_Loggi_Api $api
+             *
+             * @var array
+             */
+            return apply_filters( 'slfw_api_retrieve_api_key', ( $user['apiKey'] ?? '' ), $this );
         }
 
         /**
@@ -121,7 +129,15 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 $shops[ $node['pk'] ] = $node;
             }
 
-            return $shops;
+            /**
+             * Filter: 'slfw_api_retrieve_all_shops'
+             *
+             * @param array $shops
+             * @param SLFW_Loggi_Api $api
+             *
+             * @var array
+             */
+            return apply_filters( 'slfw_api_retrieve_all_shops', $shops, $this );
         }
 
         /**
@@ -159,7 +175,24 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 $estimation['estimations'][] = $response;
             }
 
-            return $estimation;
+            /**
+             * Filter: 'slfw_api_retrieve_order_estimation'
+             *
+             * @param array $estimation
+             * @param int $shopId
+             * @param array $pickup
+             * @param array $destination
+             * @param array $packages
+             * @param SLFW_Loggi_Api $api
+             *
+             * @var array {
+             *   'cost'        => int   $cost,
+             *   'packages'    => array $packages,
+             *   'errors'      => array $errors,
+             *   'estimations' => array $estimations,
+             * }
+             */
+            return apply_filters( 'slfw_api_retrieve_order_estimation', $estimation, $shopId, $pickup, $destination, $packages, $this );
         }
 
         /**
@@ -267,9 +300,31 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 $args['headers']['Authorization'] = sprintf( 'ApiKey %s:%s', $this->api_email, $this->api_key );
             }
 
+            /**
+             * Filter: 'slfw_api_request_args'
+             *
+             * You can change all requests to api.
+             *
+             * @param array $args
+             * @param string $name
+             * @param array $params
+             * @param array $selection
+             * @param string $operation
+             * @param SLFW_Loggi_Api $api
+             *
+             * @var array
+             */
+            $args = apply_filters( 'slfw_api_request_args', $args, $name, $params, $selection, $operation, $this );
+
             $response = wp_remote_post( $this->get_url(), $args );
+
             if ( is_wp_error( $response ) ) {
-                error_log( $response->get_error_message() );
+                $data = array(
+                    'request'  => $args,
+                    'response' => $response,
+                );
+
+                $this->log( '[Loggi Api] "' . $name . '": ' . $response->get_error_message(), $data );
                 return false;
             }
 

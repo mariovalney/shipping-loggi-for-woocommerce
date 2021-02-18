@@ -35,7 +35,7 @@ We would be grateful for a [review here](https://wordpress.org/support/plugin/sh
 
 = Support =
 
-* WooCommerce - 4.8
+WooCommerce - 5.0
 
 == Installation ==
 
@@ -88,6 +88,39 @@ If you do not know your API Key, you can insert your password and will try to re
 Every Loggi integration needs a shop. So you should request one for Loggi Support and select it on shipping settings.
 
 You can have one Loggi integration for every shop if you can send items from multiple cities.
+
+= I'm a developer and I want to change plugins behaviour! =
+
+Well... This is a developer friendly plugin. So we have a lot of hooks to be used.
+
+Actions:
+
+* slfw_before_get_admin_options_html
+
+Filters for Form Fields:
+
+* slfw_form_fields_after_main
+* slfw_form_fields_after_pickup
+* slfw_form_fields_after_api
+
+Filters for Shipping Method:
+
+* slfw_pickup_address
+* slfw_format_address
+* slfw_calculate_shipping_rate: You can change the rate args before add to cart or return empty to remove it.
+
+Filter for Log:
+
+* slfw_log_message
+
+Filter for API:
+
+* slfw_api_request_args: You can change all requests to api.
+* slfw_api_retrieve_api_key
+* slfw_api_retrieve_all_shops
+* slfw_api_retrieve_order_estimation
+
+They are well documented on respective calls and you owe me a beer.
 
 = Can I help you? =
 
