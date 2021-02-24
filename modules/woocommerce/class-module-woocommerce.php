@@ -35,8 +35,10 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             }
 
             $this->includes = array(
+                'traits/trait-has-data',
                 'traits/trait-has-logger',
                 'class-loggi-api',
+                'class-loggi-box',
                 'class-loggi-package',
                 'class-shipping-method',
             );

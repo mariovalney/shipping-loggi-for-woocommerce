@@ -46,7 +46,7 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
 
         /**
          * The boxes to be delivered
-         * @var array
+         * @var array { SLFW_Loggi_Box }
          */
         protected $boxes = array();
 
@@ -84,11 +84,11 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
                     continue;
                 }
 
-                $box['items'] = array( $item['key'] );
+                $box->set_item( $item['key'] );
 
-                for ( $index = 0; $index < $qty; $index++ ) {
-                    $this->boxes[] = $box;
-                }
+                $boxes = $this->merge_product_boxes( $box, $qty );
+
+                $this->boxes = array_merge( $this->boxes, $boxes );
             }
 
             if ( $merge ) {
@@ -122,10 +122,12 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
         public function try_merge_boxes() {}
 
         /**
-         * Check a box is valid to delivery
+         * Create a box from product
          *
-         * @param  array $box
-         * @return boolean
+         * @param  WC_Product $product
+         * @return SLFW_Loggi_Box|null
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
          */
         private function create_box_for_product( $product ) {
             $product = array(
@@ -155,11 +157,28 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
 
                 // Is valid
                 if ( $this->box_has_valid_volume( $box ) ) {
-                    return $box;
+                    return new SLFW_Loggi_Box( $box );
                 }
             }
 
-            return array();
+            return null;
+        }
+
+        /**
+         * Merge boxes from the same products
+         *
+         * @param  array $box
+         * @return array
+         */
+        private function merge_product_boxes( $box, $qty ) {
+            $qty = (int) $qty;
+
+            $boxes = array();
+            for ( $index = 0; $index < $qty; $index++ ) {
+                $boxes[] = $box;
+            }
+
+            return $boxes;
         }
 
         /**

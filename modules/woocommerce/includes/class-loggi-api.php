@@ -147,11 +147,11 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @param string $shopId
          * @param array $pickup
          * @param array $destination
-         * @param array $packages
+         * @param array { SLFW_Loggi_Box } $boxes
          * @return array
          */
-        public function retrieve_order_estimation( $shopId, $pickup, $destination, $packages ) {
-            if ( ! $this->can_make_request() || empty( $packages ) ) {
+        public function retrieve_order_estimation( $shopId, $pickup, $destination, $boxes ) {
+            if ( ! $this->can_make_request() || empty( $boxes ) ) {
                 return array();
             }
 
@@ -163,8 +163,8 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 'estimations' => array(),
             );
 
-            foreach ( array_chunk( $packages, 2 ) as $group ) {
-                $response = $this->request_order_estimation( $shopId, $pickup, $destination, $group );
+            foreach ( array_chunk( $boxes, 2 ) as $boxes ) {
+                $response = $this->request_order_estimation( $shopId, $pickup, $destination, $boxes );
 
                 if ( empty( $response ) || empty( $response['totalEstimate'] ) ) {
                     return array();
@@ -184,7 +184,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
              * @param int $shopId
              * @param array $pickup
              * @param array $destination
-             * @param array $packages
+             * @param array $boxes
              * @param SLFW_Loggi_Api $api
              *
              * @var array {
@@ -194,7 +194,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
              *   'estimations' => array $estimations,
              * }
              */
-            return apply_filters( 'slfw_api_retrieve_order_estimation', $estimation, $shopId, $pickup, $destination, $packages, $this );
+            return apply_filters( 'slfw_api_retrieve_order_estimation', $estimation, $shopId, $pickup, $destination, $boxes, $this );
         }
 
         /**
@@ -206,10 +206,10 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
          * @param string $shopId
          * @param array $pickup
          * @param array $destination
-         * @param array $packages
+         * @param array { SLFW_Loggi_Box } $boxes
          * @return array
          */
-        protected function request_order_estimation( $shopId, $pickup, $destination, $packages ) {
+        protected function request_order_estimation( $shopId, $pickup, $destination, $boxes ) {
             $params = array(
                 'shopId'  => (int) $shopId,
                 'pickups' => array(
@@ -223,7 +223,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 'packages' => array(),
             );
 
-            foreach ( $packages as $package ) {
+            foreach ( $boxes as $box ) {
                 $params['packages'][] = array(
                     'pickupIndex' => 0,
                     'recipient'   => array(
@@ -235,10 +235,10 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                         'complement' => $destination['complement'] ?? '',
                     ),
                     'dimensions'  => array(
-                        'width'  => $package['width'],
-                        'height' => $package['height'],
-                        'weight' => $package['weight'],
-                        'length' => $package['length'],
+                        'width'  => $box->width,
+                        'height' => $box->height,
+                        'weight' => $box->weight,
+                        'length' => $box->length,
                     ),
                 );
             }
