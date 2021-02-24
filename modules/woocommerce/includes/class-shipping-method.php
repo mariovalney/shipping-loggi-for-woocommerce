@@ -116,7 +116,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'type'        => 'select',
                     'class'       => 'wc-enhanced-select',
                     'title'       => __( 'Try to Merge Boxes', 'shipping-loggi-for-woocommerce' ),
-                    'desc_tip'    => __( 'By default we try to agrupate items from the same product in one package and Loggi only try to merge two packages in one delivery. If YES we will try to agrupate items by ourselves.', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'    => __( 'Loggi only try to merge two packages in one delivery. If YES we will try to agrupate items by ourselves.', 'shipping-loggi-for-woocommerce' ),
                     'default'     => '0',
                     'options'     => array(
                         '0' => __( 'No', 'shipping-loggi-for-woocommerce' ),

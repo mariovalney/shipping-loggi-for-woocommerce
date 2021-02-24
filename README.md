@@ -61,6 +61,8 @@ Then
 
 We'll send all data about height, width, length and weight to Loggi and receive all the calculated packages.
 
+Loggi is only able to receive two packages by estimation. This way, if you deactivate the "Try to Merge Boxes" option 20 itens will generate 10 delivery estimations.
+
 ### What's the limit of sizes? ###
 
 Loggi has the limit of 55x55x55cm and 20kg.
@@ -76,6 +78,10 @@ By default every item of order will be one package and we'll send all data to Lo
 Loggi will receive two items by time and check if they can be sent in 1 or 2 deliveries. For example, two items with 20x20x20 will be sent in one travel, because they are less than the limit of 55x55x55. But two items with 40x40x40 will result in two deliveries (double of cost).
 
 If you activate this option we'll try to agrupate items by our own way before send data to Loggi as they can handle only 2 packages by request.
+
+### I cannot see the Loggi price in cart ###
+
+Make sure all cart items can be sent by Loggi. You can check logs.
 
 ### How delivery estimation time is calculated? ###
 

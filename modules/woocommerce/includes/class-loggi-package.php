@@ -17,34 +17,6 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
     class SLFW_Loggi_Package {
 
         /**
-         * The max height for a package in cm
-         *
-         * @var int
-         */
-        const MAX_HEIGHT = 55;
-
-        /**
-         * The max width for a package in cm
-         *
-         * @var int
-         */
-        const MAX_WIDTH = 55;
-
-        /**
-         * The max length for a package in cm
-         *
-         * @var int
-         */
-        const MAX_LENGTH = 55;
-
-        /**
-         * The max weight for a package in g
-         *
-         * @var int
-         */
-        const MAX_WEIGHT = 20000;
-
-        /**
          * The boxes to be delivered
          * @var array { SLFW_Loggi_Box }
          */
@@ -60,6 +32,8 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
          * The constructor
          *
          * @param string $environment
+         *
+         * @SuppressWarnings(PHPMD.MissingImport)
          */
         public function __construct( $package, $shipping_classes = array(), $merge = false ) {
             $package = (array) $package;
@@ -78,15 +52,19 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
                     continue;
                 }
 
-                $box = $this->create_box_for_product( $product );
-                if ( empty( $box ) ) {
+                $dimensions = $this->get_valid_product_dimensions( $product );
+                if ( empty( $dimensions ) ) {
                     $this->can_be_delivered = false;
                     continue;
                 }
 
-                $box->set_item( $item['key'] );
+                $boxes = array();
+                for ( $index = 0; $index < $qty; $index++ ) {
+                    $box = new SLFW_Loggi_Box( $dimensions );
+                    $box->add_item( $item['key'] );
 
-                $boxes = $this->merge_product_boxes( $box, $qty );
+                    $boxes[] = $box;
+                }
 
                 $this->boxes = array_merge( $this->boxes, $boxes );
             }
@@ -115,21 +93,90 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
         }
 
         /**
+         * Get info about weigh and items from package
+         *
+         * @param  array $boxes
+         * @return array
+         */
+        public function get_boxes_info( $boxes = array() ) {
+            $info = array(
+                'weight' => 0,
+                'items'  => array(),
+            );
+
+            if ( empty( $boxes ) ) {
+                $boxes = $this->boxes;
+            }
+
+            foreach ( $boxes as $box ) {
+                $info['weight'] += $box->weight;
+
+                foreach ( $box->get_items() as $key => $qty ) {
+                    $info['items'][ $key ] = ( $info['items'][ $key ] ?? 0 ) + $qty;
+                }
+            }
+
+            return $info;
+        }
+
+        /**
          * Try to merge boxes
          *
          * @return void
          */
-        public function try_merge_boxes() {}
+        public function try_merge_boxes() {
+            $remaining = $this->boxes;
+            if ( empty( $remaining ) ) {
+                return;
+            }
+
+            // Let's check eveything is OK at end
+            $integrity = $this->get_boxes_info( $remaining );
+
+            $boxes = array();
+
+            // Get the first box
+            $mergeable = array_shift( $remaining );
+
+            // While we have boxes, try to merge
+            while ( ! empty( $remaining ) || ! empty( $mergeable ) ) {
+                foreach ( (array) $remaining as $key => $box ) {
+                    if ( ! $mergeable->merge_box( $box ) ) {
+                        continue;
+                    }
+
+                    // Remove from list if merged
+                    unset( $remaining[ $key ] );
+                }
+
+                // After all, add the mergeable to list and get the next
+                $boxes[] = $mergeable;
+                $mergeable = array_shift( $remaining );
+            }
+
+            // Info about merged boxes
+            $challenge = $this->get_boxes_info( $boxes );
+
+            if ( $integrity['weight'] !== $challenge['weight'] ) {
+                return;
+            }
+
+            if ( ! empty( array_diff_assoc( $integrity['items'], $challenge['items'] ) ) ) {
+                return;
+            }
+
+            $this->boxes = $boxes;
+        }
 
         /**
-         * Create a box from product
+         * Create a set of valid dimensions to create a box for a product
          *
          * @param  WC_Product $product
-         * @return SLFW_Loggi_Box|null
+         * @return array|null
          *
          * @SuppressWarnings(PHPMD.MissingImport)
          */
-        private function create_box_for_product( $product ) {
+        private function get_valid_product_dimensions( $product ) {
             $product = array(
                 'height' => ceil( wc_get_dimension( (float) $product->get_height(), 'cm' ) ),
                 'width'  => ceil( wc_get_dimension( (float) $product->get_width(), 'cm' ) ),
@@ -148,55 +195,21 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
             );
 
             foreach ( $box_combinations as $combination ) {
-                $box = array(
+                $data = array(
                     'height' => $product[ $combination[0] ],
                     'width'  => $product[ $combination[1] ],
                     'length' => $product[ $combination[2] ],
                     'weight' => $product['weight'],
                 );
 
-                // Is valid
-                if ( $this->box_has_valid_volume( $box ) ) {
-                    return new SLFW_Loggi_Box( $box );
+                // Let's create a box just to validate
+                $box = new SLFW_Loggi_Box( $data );
+                if ( $box->has_valid_dimensions() ) {
+                    return $box->get_data();
                 }
             }
 
             return null;
-        }
-
-        /**
-         * Merge boxes from the same products
-         *
-         * @param  array $box
-         * @return array
-         */
-        private function merge_product_boxes( $box, $qty ) {
-            $qty = (int) $qty;
-
-            $boxes = array();
-            for ( $index = 0; $index < $qty; $index++ ) {
-                $boxes[] = $box;
-            }
-
-            return $boxes;
-        }
-
-        /**
-         * Check a box is valid to delivery
-         *
-         * @param  array $box
-         * @return boolean
-         */
-        private function box_has_valid_volume( $box ) {
-            if ( $box['height'] > self::MAX_HEIGHT || $box['width'] > self::MAX_WIDTH || $box['length'] > self::MAX_LENGTH ) {
-                return false;
-            }
-
-            if ( $box['weight'] > self::MAX_WEIGHT ) {
-                return false;
-            }
-
-            return true;
         }
 
         /**
