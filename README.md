@@ -77,6 +77,20 @@ Loggi will receive two items by time and check if they can be sent in 1 or 2 del
 
 If you activate this option we'll try to agrupate items by our own way before send data to Loggi as they can handle only 2 packages by request.
 
+### How delivery estimation time is calculated? ###
+
+We get the value from Loggi in seconds and change to hours (rounding up).
+
+If your package will be divided in more than one estimation we use the bigger value.
+
+### But I need time to prepare my delivery. ###
+
+No problem. You can add "additional time" to your operation. Just setting how much hours you'll need for it.
+
+### How to show the ETA in days? ###
+
+You should use the filter 'slfw_rate_delivery_time_text' to write your own message.
+
 ### What are the credentials? ###
 
 Your e-mail and API Key from Loggi.
@@ -103,10 +117,12 @@ Filters for Form Fields:
 * slfw_form_fields_after_pickup
 * slfw_form_fields_after_api
 
-Filters for Shipping Method:
+Filters for Shipping Method / Rate:
 
 * slfw_pickup_address
 * slfw_format_address
+* slfw_rate_additional_time
+* slfw_rate_delivery_time_text
 * slfw_calculate_shipping_rate: You can change the rate args before add to cart or return empty to remove it.
 
 Filter for Log:

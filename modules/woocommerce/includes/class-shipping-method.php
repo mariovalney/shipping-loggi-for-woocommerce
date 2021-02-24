@@ -123,6 +123,28 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                         '1' => __( 'Yes', 'shipping-loggi-for-woocommerce' ),
                     ),
                 ),
+                'show_estimation'     => array(
+                    'type'        => 'select',
+                    'class'       => 'wc-enhanced-select',
+                    'title'       => __( 'Delivery Estimation', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'    => __( 'Check Loggi service time for more details.', 'shipping-loggi-for-woocommerce' ),
+                    'default'     => '0',
+                    'options'     => array(
+                        '0' => __( 'No', 'shipping-loggi-for-woocommerce' ),
+                        '1' => __( 'Yes', 'shipping-loggi-for-woocommerce' ),
+                    ),
+                ),
+                'additional_time'     => array(
+                    'type'              => 'number',
+                    'class'             => 'short',
+                    'title'             => __( 'Additional Time', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'How much hours you need to prepare the order to be delivered?', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => 0,
+                    'custom_attributes' => array(
+                        'min'  => 0,
+                        'step' => 1,
+                    ),
+                ),
             );
 
             $pickup_form_fields = array(
@@ -388,6 +410,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $loggi_package = new SLFW_Loggi_Package( $package, $shipping_classes, $merge_boxes );
             $boxes = $loggi_package->get_boxes();
 
+            // Check we can delivery it
             if ( ! $loggi_package->can_be_delivered() ) {
                 $data = array(
                     'package' => $package,
@@ -398,6 +421,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 return;
             }
 
+            // Retrieve the Loggi Estimation
             $estimation = $this->api()->retrieve_order_estimation( $shopId, $pickup, $destination, $boxes );
             if ( empty( $estimation ) || empty( $estimation['cost'] ) || ! empty( $estimation['errors'] ) ) {
                 $data = array(
@@ -415,6 +439,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                 'taxes'     => false,
                 'meta_data' => array(
                     'loggi_estimation' => $estimation,
+                    'loggi_eta'        => $this->calculate_estimation_eta( $estimation ),
                 ),
             );
 
@@ -535,6 +560,37 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
              * @var array
              */
             return apply_filters( 'slfw_format_address', $formated, $address, $this );
+        }
+
+        /**
+         * Calculate the ETA from Loggi Estimation
+         *
+         * @param array $estimation
+         *
+         * @return int
+         */
+        protected function calculate_estimation_eta( $estimation ) {
+            if ( empty( $this->get_option( 'show_estimation', '0' ) ) ) {
+                return 0;
+            }
+
+            $eta = (int) ( $estimation['eta'] ?? 0 );
+
+            /**
+             * Filter: 'slfw_rate_additional_time'
+             *
+             * @param int $additional_time
+             * @param array $estimation
+             * @param WC_Shipping_Method $shipping_method
+             *
+             * @var int
+             */
+            $additional_time = (int) apply_filters( 'slfw_rate_additional_time', $this->get_option( 'additional_time', 0 ), $estimation, $this );
+            if ( $additional_time ) {
+                $eta += $additional_time * HOUR_IN_SECONDS;
+            }
+
+            return $eta;
         }
 
         /**

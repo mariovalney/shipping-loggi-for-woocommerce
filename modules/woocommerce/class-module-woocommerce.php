@@ -50,6 +50,8 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
          */
         public function define_hooks() {
             $this->core->add_filter( 'woocommerce_shipping_methods', array( $this, 'woocommerce_shipping_methods' ), 99 );
+
+            $this->core->add_action( 'woocommerce_after_shipping_rate', array( $this, 'woocommerce_after_shipping_rate' ), 99 );
             $this->core->add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 99 );
 
             $this->core->add_action( 'wp_ajax_slfw_request_api_key', array( $this, 'wp_ajax_slfw_request_api_key' ), 99 );
@@ -144,6 +146,47 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             }
 
             wp_send_json_success( $shops );
+        }
+
+        /**
+         * Action: 'woocommerce_after_shipping_rate'
+         * Show a delivery estimation for Loggi.
+         *
+         * @param WC_Shipping_Rate $rate
+         *
+         * @return void
+         */
+        public function woocommerce_after_shipping_rate( $rate ) {
+            $eta = $rate->get_meta_data();
+            $eta = $eta['loggi_eta'] ?? 0;
+            $eta = ceil( (int) $eta / HOUR_IN_SECONDS );
+
+            if ( empty( $eta ) ) {
+                return;
+            }
+
+            // translators: %d: hours to delivery
+            $text = sprintf( _n( 'Delivery within %d hour', 'Delivery within %d hours', $eta, 'shipping-loggi-for-woocommerce' ), $eta );
+
+            /**
+             * Filter: 'slfw_rate_delivery_time_text'
+             *
+             * You can change the delivery estimation text.
+             * Return empty to not show.
+             *
+             * @param text $estimation_text  Default estimation text
+             * @param int $eta               Estimation time in hours
+             * @param WC_Shipping_Rate $rate The shipping rate
+             *
+             * @var string
+             */
+            $text = apply_filters( 'slfw_rate_delivery_time_text', $text, (int) $eta, $rate );
+
+            if ( empty( $text ) ) {
+                return;
+            }
+
+            echo '<p><small>' . esc_html( $text ) . '</small></p>';
         }
 
         /**

@@ -157,6 +157,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
 
             $estimation = array(
                 'cost'        => 0,
+                'eta'         => 0,
                 'packages'    => array(),
                 'errors'      => array(),
                 'estimations' => array(),
@@ -170,6 +171,7 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
                 }
 
                 $estimation['cost'] += (float) $response['totalEstimate']['totalCost'];
+                $estimation['eta'] = max( (int) $response['totalEstimate']['totalEta'], $estimation['eta'] );
                 $estimation['packages'] = array_merge( $estimation['packages'], $response['ordersEstimate'] );
                 $estimation['errors'] = array_merge( $estimation['errors'], $response['packagesWithErrors'] );
                 $estimation['estimations'][] = $response;
