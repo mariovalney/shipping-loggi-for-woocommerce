@@ -20,6 +20,44 @@ jQuery(document).ready(function($) {
 
     $('body').trigger('update-environment.slfw');
 
+    // Working Days Input
+    $('body').on('change', '.slfw-working-day-input input', function(event) {
+        const wrapper = $(this).parents('.slfw-working-day-input');
+        const input = wrapper.siblings('input');
+
+        const is_active = wrapper.find('.input-active').prop('checked');
+        const start_hour = wrapper.find('.input-start-time.input-hour');
+        const start_minute = wrapper.find('.input-start-time.input-minute');
+        const end_hour = wrapper.find('.input-end-time.input-hour');
+        const end_minute = wrapper.find('.input-end-time.input-minute');
+
+        const calculate_time = (input, max = 59, min = 0)  => {
+            let value = parseInt( input.val().replace(/\D/g, '') );
+            if (! value || value < min) {
+                value = min;
+            }
+
+            if (value > max) {
+                value = max;
+            }
+
+            value = value.toString().padStart(2, '0');
+            input.val(value);
+
+            return value;
+        };
+
+        let value = is_active ? '1' : '0';
+
+        const output = `${value}|${calculate_time(start_hour, 23)}:${calculate_time(start_minute)}|${calculate_time(end_hour, 23)}:${calculate_time(end_minute)}`;
+        input.val(output);
+
+        start_hour.prop('disabled', ! is_active);
+        start_minute.prop('disabled', ! is_active);
+        end_hour.prop('disabled', ! is_active);
+        end_minute.prop('disabled', ! is_active);
+    });
+
     // Reload Shops
     $('body').on('change', '.loggi-api-input', function(event) {
         const environment = $('[name="woocommerce_loggi-shipping_environment"]').val();

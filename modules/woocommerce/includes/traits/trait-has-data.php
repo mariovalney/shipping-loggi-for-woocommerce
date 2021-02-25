@@ -1,7 +1,7 @@
 <?php
 /**
  * SLFW_Has_Data
- * Trait to help classes with logger
+ * Trait to help classes with data
  *
  * @package         Shipping_Loggi_For_WooCommerce
  * @subpackage      SLFW_Module_Woocommerce

@@ -93,6 +93,12 @@ If your package will be divided in more than one estimation we use the bigger va
 
 No problem. You can add "additional time" to your operation. Just setting how much hours you'll need for it.
 
+= Can I deactivate my Loggi integration by night? =
+
+Sure! You can show the days you will delivery with Loggi.
+
+Don't forget to check Loggi support about working date and time.
+
 = How to show the ETA in days? =
 
 You should use the filter 'slfw_rate_delivery_time_text' to write your own message.
@@ -120,7 +126,6 @@ Actions:
 Filters for Form Fields:
 
 * slfw_form_fields_after_main
-* slfw_form_fields_after_pickup
 * slfw_form_fields_after_api
 
 Filters for Shipping Method / Rate:

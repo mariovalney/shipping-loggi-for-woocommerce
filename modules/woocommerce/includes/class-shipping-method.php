@@ -17,6 +17,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
     class SLFW_Shipping_Method extends WC_Shipping_Method {
 
         use SLFW_Has_Logger;
+        use SLFW_Has_Time;
 
         /**
          * The shipping method ID
@@ -148,7 +149,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             );
 
             $pickup_form_fields = array(
-                'origin_section'    => array(
+                'pickup_section'    => array(
                     'type'        => 'title',
                     'title'       => __( 'Pickup Address', 'shipping-loggi-for-woocommerce' ),
                     'description' => __( 'From where you are going to send your packages.', 'shipping-loggi-for-woocommerce' ),
@@ -191,6 +192,56 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
                     'desc_tip'          => __( 'Select your country and state/region, if available.', 'shipping-loggi-for-woocommerce' ),
                     'default'           => get_option( 'woocommerce_default_country' ),
                     'custom_attributes' => array( 'required' => 'required' ),
+                ),
+            );
+
+            $working_fields = array(
+                'working_section'  => array(
+                    'type'        => 'title',
+                    'title'       => __( 'Working Time', 'shipping-loggi-for-woocommerce' ),
+                    'description' => __( 'Select your working time to make Loggi available.', 'shipping-loggi-for-woocommerce' ),
+                ),
+                'working_day_0'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Sunday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
+                ),
+                'working_day_1'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Monday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
+                ),
+                'working_day_2'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Tuesday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
+                ),
+                'working_day_3'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Wednesday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
+                ),
+                'working_day_4'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Thursday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
+                ),
+                'working_day_5'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Friday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
+                ),
+                'working_day_6'    => array(
+                    'type'              => 'select_working_day',
+                    'title'             => __( 'Saturday', 'shipping-loggi-for-woocommerce' ),
+                    'desc_tip'          => __( 'Mark the checkbox to allow Loggi for orders in this day and select the start and end time.', 'shipping-loggi-for-woocommerce' ),
+                    'default'           => '1|06:00|23:59',
                 ),
             );
 
@@ -304,16 +355,6 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             $form_fields_after_main = apply_filters( 'slfw_form_fields_after_main', array(), $this );
 
             /**
-             * Filter: 'slfw_form_fields_after_pickup'
-             *
-             * @param array $fields
-             * @param SLFW_Shipping_Method $shipping_method
-             *
-             * @var array
-             */
-            $form_fields_after_pickup = apply_filters( 'slfw_form_fields_after_pickup', array(), $this );
-
-            /**
              * Filter: 'slfw_form_fields_after_api'
              *
              * @param array $fields
@@ -329,11 +370,11 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
              */
             $this->instance_form_fields = array_merge(
                 $main_form_fields,
-                array_diff_key( $form_fields_after_main, $main_form_fields, $pickup_form_fields, $api_form_fields, $advanced_form_fields ),
+                array_diff_key( (array) $form_fields_after_main, $main_form_fields ),
                 $pickup_form_fields,
-                array_diff_key( $form_fields_after_pickup, $main_form_fields, $pickup_form_fields, $api_form_fields, $advanced_form_fields ),
+                $working_fields,
                 $api_form_fields,
-                array_diff_key( $form_fields_after_api, $main_form_fields, $pickup_form_fields, $api_form_fields, $advanced_form_fields ),
+                array_diff_key( (array) $form_fields_after_api, $main_form_fields, $pickup_form_fields, $working_fields, $api_form_fields ),
                 $advanced_form_fields
             );
         }
@@ -377,14 +418,88 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
         }
 
         /**
+         * Generate a input to activate a day and choose start and end time
+         *
+         * @see WC_Settings_API->generate_settings_html()
+         *
+         * @param  string $key
+         * @param  array $data
+         * @return string
+         */
+        public function generate_select_working_day_html( $key, $data ) {
+            $defaults  = array(
+                'title'    => '',
+                'desc_tip' => false,
+                'default'  => '1|06:00|23:59',
+            );
+
+            $data = wp_parse_args( $data, $defaults );
+
+            $field_key = $this->get_field_key( $key );
+
+            $value = $this->get_option( $key );
+            $value = $this->parse_working_input( $value );
+
+            $disabled = disabled( empty( $value->active ), true, false );
+
+            ob_start();
+            ?>
+            <tr valign="top">
+                <th scope="row" class="titledesc">
+                    <label for="<?php echo esc_attr( $field_key ); ?>">
+                        <?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?>
+                    </label>
+                </th>
+                <td>
+                    <fieldset>
+                        <legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+
+                        <div class="slfw-working-day-input">
+                            <input class="input-active" type="checkbox" value="1" <?php checked( $value->active, '1' ); ?> />
+
+                            <div class="input-timepicker">
+                                <input class="input-hour input-start-time" type="text" pattern="[\d]{2}" <?php esc_html_e( $disabled ); ?> value="<?php echo esc_attr( $value->start->h ); ?>">
+                                <span>:</span>
+                                <input class="input-minute input-start-time" type="text" pattern="[\d]{2}" <?php esc_html_e( $disabled ); ?> value="<?php echo esc_attr( $value->start->i ); ?>">
+
+                                <span class="time-separator"><?php echo esc_attr_x( 'to', 'time a TO time b', 'shipping-loggi-for-woocommerce' ); ?></span>
+
+                                <input class="input-hour input-end-time" type="text" pattern="[\d]{2}" <?php esc_html_e( $disabled ); ?> value="<?php echo esc_attr( $value->end->h ); ?>">
+                                <span>:</span>
+                                <input class="input-minute input-end-time" type="text" pattern="[\d]{2}" <?php esc_html_e( $disabled ); ?> value="<?php echo esc_attr( $value->end->i ); ?>">
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>"/>
+                    </fieldset>
+                </td>
+            </tr>
+            <?php
+
+            return ob_get_clean();
+        }
+
+        /**
          * Calculate shipping rates
          *
          * @param mixed $package
          * @return void
          *
          * @SuppressWarnings(PHPMD.MissingImport)
+         * @SuppressWarnings(PHPMD.NPathComplexity)
+         * @SuppressWarnings(PHPMD.CyclomaticComplexity)
          */
         public function calculate_shipping( $package = array() ) {
+            $now = current_datetime();
+            $time = $now->format( 'U' );
+
+            $schedule = $this->get_option( 'working_day_' . $now->format( 'w' ) );
+            $schedule = $this->parse_working_input( $schedule );
+
+            if ( ! $schedule->active || $schedule->start->time > $time || $schedule->end->time < $time ) {
+                return;
+            }
+
             $destination = $this->format_address( $package['destination'] );
             if ( empty( $destination ) ) {
                 $this->log( '[calculate_shipping] Destination is empty.' );
@@ -560,6 +675,22 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
              * @var array
              */
             return apply_filters( 'slfw_format_address', $formated, $address, $this );
+        }
+
+        /**
+         * Parse a string to get a working_time value
+         *
+         * @param  string $value
+         * @return object
+         */
+        private function parse_working_input( $value ) {
+            $value = explode( '|', $value );
+
+            return (object) array(
+                'active' => empty( $value[0] ) ? '0' : '1',
+                'start'  => $this->parse_time( $value[1] ?? '' ),
+                'end'    => $this->parse_time( $value[2] ?? '' ),
+            );
         }
 
         /**

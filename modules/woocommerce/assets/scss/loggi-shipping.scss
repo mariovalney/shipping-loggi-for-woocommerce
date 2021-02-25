@@ -14,3 +14,31 @@
         color: #d63638 !important;
     }
 }
+
+.slfw-working-day-input {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+
+    .input-timepicker {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 1em;
+
+        input {
+            width: 50px !important;
+            padding: 2px !important;
+            text-align: center !important;
+        }
+
+        span {
+            margin: 0 .5em;
+
+            &.time-separator {
+                margin: 0 1em;
+            }
+        }
+    }
+}
