@@ -37,6 +37,12 @@ We would be grateful for a [review here](https://wordpress.org/support/plugin/sh
 
 WooCommerce - 5.0
 
+### DISCLAIMER ###
+
+This plugin was created without any encouragement from Loggi. Loggi is a registered mark.
+
+The developers of this plugin haven't any connection with Loggi. This plugin was created based on Loggi's documentation and we are not responsible for any estimation problem.
+
 ## Installation ##
 
 First
