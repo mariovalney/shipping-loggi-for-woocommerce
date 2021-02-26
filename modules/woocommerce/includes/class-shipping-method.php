@@ -567,10 +567,11 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
              * @param array $rate
              * @param array $estimation
              * @param array $package
+             * @param SLFW_Shipping_Method $shipping_method
              *
              * @var array
              */
-            $rate = apply_filters( 'slfw_calculate_shipping_rate', $rate, $estimation, $package );
+            $rate = apply_filters( 'slfw_calculate_shipping_rate', $rate, $estimation, $package, $this );
 
             if ( empty( $rate ) ) {
                 return;
