@@ -320,13 +320,14 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
 
             $response = wp_remote_post( $this->get_url(), $args );
 
-            if ( is_wp_error( $response ) ) {
-                $data = array(
-                    'request'  => $args,
-                    'response' => $response,
-                );
+            // Log data
+            $log_data = array(
+                'request'  => $args,
+                'response' => $response,
+            );
 
-                $this->log( '[Loggi Api] "' . $name . '": ' . $response->get_error_message(), $data );
+            if ( is_wp_error( $response ) ) {
+                $this->log( '[Loggi Api] WP_Error: "' . $name . '" (' . $response->get_error_message() . ')', $log_data );
                 return false;
             }
 
@@ -334,27 +335,18 @@ if ( ! class_exists( 'SLFW_Loggi_Api' ) ) {
 
             // Check for errors
             if ( ! empty( $response['errors'] ) ) {
-                $data = array(
-                    'request'  => $args,
-                    'response' => $response,
-                );
-
-                $this->log( '[Loggi Api] Error: "' . $name . '"', $data );
-
+                $this->log( '[Loggi Api] Error: "' . $name . '"', $log_data );
                 return false;
             }
 
-            if ( empty( $response['data'] ) ) {
-                $data = array(
-                    'request'  => $args,
-                    'response' => $response,
-                );
-
-                $this->log( '[Loggi Api] Empty data: "' . $name . '"', $data );
+            if ( empty( $response['data'] ) || empty( $response['data'][ $name ] ) ) {
+                $this->log( '[Loggi Api] Empty data: "' . $name . '"', $log_data );
                 return false;
             }
 
-            return $response['data'][ $name ] ?? false;
+            $this->log( '[Loggi Api] Success: "' . $name . '"', $log_data );
+
+            return $response['data'][ $name ];
         }
 
         /**

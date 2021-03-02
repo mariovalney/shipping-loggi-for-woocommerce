@@ -4,8 +4,8 @@
 **Tags:** woocommerce, api, loggi, shipping, mariovalney  
 **Requires at least:** 5.0  
 **Tested up to:** 5.6  
-**Requires PHP:** 7.0  
-**Stable tag:** 1.0.0  
+**Requires PHP:** 7.3  
+**Stable tag:** 1.1.0  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -160,6 +160,10 @@ They are well documented on respective calls and you owe me a beer.
 Yes! Visit [GitHub repository](https://github.com/mariovalney/shipping-loggi-for-woocommerce).
 
 ## Changelog ##
+
+### 1.1 ###
+
+* Added log on success.
 
 ### 1.0 ###
 
