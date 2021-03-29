@@ -4,7 +4,7 @@
  * Plugin Name:     Shipping Loggi for WooCommerce
  * Plugin URI:      https://github.com/mariovalney/shipping-loggi-for-woocommerce
  * Description:     Shipping via motorcycle courier with Loggi
- * Version:         1.1.0
+ * Version:         1.1.2
  * License:         GPLv2 or later
  * Author:          Mário Valney
  * Author URI:      https://mariovalney.com
@@ -288,7 +288,7 @@ if ( ! class_exists( 'Shipping_Loggi_For_WooCommerce' ) ) {
          */
         public function run() {
             // Definitions to plugin
-            define( 'SLFW_VERSION', '1.1.0' );
+            define( 'SLFW_VERSION', '1.1.2' );
             define( 'SLFW_PLUGIN_FILE', __FILE__ );
             define( 'SLFW_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
             define( 'SLFW_PLUGIN_PATH', WP_PLUGIN_DIR . '/' . dirname( SLFW_PLUGIN_BASENAME ) );

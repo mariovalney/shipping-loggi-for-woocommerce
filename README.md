@@ -5,7 +5,7 @@
 **Requires at least:** 5.0  
 **Tested up to:** 5.6  
 **Requires PHP:** 7.3  
-**Stable tag:** 1.1.0  
+**Stable tag:** 1.1.2  
 **License:** GPLv2 or later  
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -164,6 +164,7 @@ Yes! Visit [GitHub repository](https://github.com/mariovalney/shipping-loggi-for
 ### 1.1 ###
 
 * Added log on success.
+* Fixed weight unit hardcoded.
 
 ### 1.0 ###
 
