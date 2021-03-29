@@ -181,7 +181,7 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
                 'height' => ceil( wc_get_dimension( (float) $product->get_height(), 'cm' ) ),
                 'width'  => ceil( wc_get_dimension( (float) $product->get_width(), 'cm' ) ),
                 'length' => ceil( wc_get_dimension( (float) $product->get_length(), 'cm' ) ),
-                'weight' => ceil( wc_get_weight( (float) $product->get_weight(), 'g', 'kg' ) ),
+                'weight' => ceil( wc_get_weight( (float) $product->get_weight(), 'g' ) ),
             );
 
             // Let's check every possibility
