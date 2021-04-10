@@ -18,6 +18,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
 
         use SLFW_Has_Logger;
         use SLFW_Has_Time;
+        use SLFW_Has_Session;
 
         /**
          * The shipping method ID
@@ -488,6 +489,7 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
          * @SuppressWarnings(PHPMD.MissingImport)
          * @SuppressWarnings(PHPMD.NPathComplexity)
          * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+         * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
          */
         public function calculate_shipping( $package = array() ) {
             $now = current_datetime();
@@ -537,7 +539,29 @@ if ( ! class_exists( 'SLFW_Shipping_Method' ) && class_exists( 'WC_Shipping_Meth
             }
 
             // Retrieve the Loggi Estimation
-            $estimation = $this->api()->retrieve_order_estimation( $shopId, $pickup, $destination, $boxes );
+
+            /**
+             * Filter: 'slfw_use_session_on_estimation'
+             *
+             * We will use a cache for estimation only if is not checkout page.
+             * You can change it returning true or false.
+             *
+             * @param boolean is_checkout()
+             * @param SLFW_Loggi_Package $loggi_package
+             *
+             * @var boolean
+             */
+            $use_session = apply_filters( 'slfw_use_session_on_estimation', ! is_checkout(), $loggi_package );
+
+            $session_key = 'estimation_' . $loggi_package->unique_identifier();
+
+            $estimation = $this->from_session( $session_key );
+            if ( empty( $estimation ) || ! $use_session ) {
+                error_log( 'saving' );
+                $estimation = $this->api()->retrieve_order_estimation( $shopId, $pickup, $destination, $boxes );
+                $this->to_session( $session_key, $estimation );
+            }
+
             if ( empty( $estimation ) || empty( $estimation['cost'] ) || ! empty( $estimation['errors'] ) ) {
                 $data = array(
                     'order'      => $package,

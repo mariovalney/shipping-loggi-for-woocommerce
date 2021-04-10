@@ -37,6 +37,7 @@ if ( ! class_exists( 'SLFW_Module_Woocommerce' ) ) {
             $this->includes = array(
                 'traits/trait-has-data',
                 'traits/trait-has-logger',
+                'traits/trait-has-session',
                 'traits/trait-has-time',
                 'class-loggi-api',
                 'class-loggi-box',

@@ -17,6 +17,18 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
     class SLFW_Loggi_Package {
 
         /**
+         * The WooCommerce package deliverable items
+         * @var array
+         */
+        protected $items = array();
+
+        /**
+         * The WooCommerce package destination
+         * @var array
+         */
+        protected $destination = array();
+
+        /**
          * The boxes to be delivered
          * @var array { SLFW_Loggi_Box }
          */
@@ -38,6 +50,8 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
         public function __construct( $package, $shipping_classes = array(), $merge = false ) {
             $package = (array) $package;
 
+            $this->destination = (array) $package['destination'];
+
             foreach ( $package['contents'] as $item ) {
                 $product = $item['data'];
                 $qty = (int) $item['quantity'];
@@ -58,6 +72,10 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
                     continue;
                 }
 
+                // Add to item list
+                $this->items[ $item['key'] ] = $item;
+
+                // Boxes
                 $boxes = array();
                 for ( $index = 0; $index < $qty; $index++ ) {
                     $box = new SLFW_Loggi_Box( $dimensions );
@@ -90,6 +108,29 @@ if ( ! class_exists( 'SLFW_Loggi_Package' ) ) {
          */
         public function get_boxes() {
             return $this->boxes;
+        }
+
+        /**
+         * Return a unique identifier to this package
+         *
+         * @return string
+         */
+        public function unique_identifier() {
+            $hashes = array();
+
+            foreach ( $this->items as $key => $value ) {
+                $hashes[] = 'item-' . $key . '-' . $value['data_hash'] . '-' . (int) $value['quantity'];
+            }
+
+            foreach ( $this->destination as $key => $value ) {
+                $hashes[] = 'destination-' . $key . '-' . md5( (string) $value ?? '' );
+            }
+
+            natsort( $hashes );
+
+            $hashes = implode( '---', array_values( $hashes ) );
+
+            return md5( $hashes );
         }
 
         /**

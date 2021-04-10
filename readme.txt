@@ -121,6 +121,14 @@ Every Loggi integration needs a shop. So you should request one for Loggi Suppor
 
 You can have one Loggi integration for every shop if you can send items from multiple cities.
 
+= Why estimation is taking so long? =
+
+We should request Loggi to retrieve a estimation. It takes 2 seconds in average by our testings.
+
+To avoid taking this time every time you load your cart we'll save this value and request only after 5 minutes. This value is unique by cart and destination so we will request Loggi again if you change any product, variation, quantity or any detail from destination.
+
+In checkout page we'll request Loggi always to avoid any misvalue in the order totals.
+
 = I'm a developer and I want to change plugins behaviour! =
 
 Well... This is a developer friendly plugin. So we have a lot of hooks to be used.
@@ -134,12 +142,16 @@ Filters for Form Fields:
 * slfw_form_fields_after_main
 * slfw_form_fields_after_api
 
-Filters for Shipping Method / Rate:
+Filters for Shipping Method:
 
 * slfw_pickup_address
 * slfw_format_address
 * slfw_rate_additional_time
 * slfw_rate_delivery_time_text
+* slfw_use_session_on_estimation
+
+Filters for Rate:
+
 * slfw_calculate_shipping_rate: You can change the rate args before add to cart or return empty to remove it.
 
 Filter for Log:
@@ -160,6 +172,10 @@ They are well documented on respective calls and you owe me a beer.
 Yes! Visit [GitHub repository](https://github.com/mariovalney/shipping-loggi-for-woocommerce).
 
 == Changelog ==
+
+= 1.2 =
+
+* Added estimation to WooCommerce Session to improve performance.
 
 = 1.1 =
 
